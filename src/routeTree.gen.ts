@@ -10,33 +10,114 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as KeuanganRouteImport } from './routes/keuangan'
+import { Route as KompetisiRouteImport } from './routes/kompetisi'
+import { Route as LatihanRouteImport } from './routes/latihan'
+import { Route as PemainRouteImport } from './routes/pemain'
+import { Route as PengaturanRouteImport } from './routes/pengaturan'
+import { Route as PemainIdRouteImport } from './routes/pemain.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const KeuanganRoute = KeuanganRouteImport.update({
+  id: '/keuangan',
+  path: '/keuangan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KompetisiRoute = KompetisiRouteImport.update({
+  id: '/kompetisi',
+  path: '/kompetisi',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LatihanRoute = LatihanRouteImport.update({
+  id: '/latihan',
+  path: '/latihan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PemainRoute = PemainRouteImport.update({
+  id: '/pemain',
+  path: '/pemain',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PengaturanRoute = PengaturanRouteImport.update({
+  id: '/pengaturan',
+  path: '/pengaturan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PemainIdRoute = PemainIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => PemainRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/keuangan': typeof KeuanganRoute
+  '/kompetisi': typeof KompetisiRoute
+  '/latihan': typeof LatihanRoute
+  '/pemain': typeof PemainRouteWithChildren
+  '/pengaturan': typeof PengaturanRoute
+  '/pemain/$id': typeof PemainIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/keuangan': typeof KeuanganRoute
+  '/kompetisi': typeof KompetisiRoute
+  '/latihan': typeof LatihanRoute
+  '/pemain': typeof PemainRouteWithChildren
+  '/pengaturan': typeof PengaturanRoute
+  '/pemain/$id': typeof PemainIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/keuangan': typeof KeuanganRoute
+  '/kompetisi': typeof KompetisiRoute
+  '/latihan': typeof LatihanRoute
+  '/pemain': typeof PemainRouteWithChildren
+  '/pengaturan': typeof PengaturanRoute
+  '/pemain/$id': typeof PemainIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/keuangan'
+    | '/kompetisi'
+    | '/latihan'
+    | '/pemain'
+    | '/pengaturan'
+    | '/pemain/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/keuangan'
+    | '/kompetisi'
+    | '/latihan'
+    | '/pemain'
+    | '/pengaturan'
+    | '/pemain/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/keuangan'
+    | '/kompetisi'
+    | '/latihan'
+    | '/pemain'
+    | '/pengaturan'
+    | '/pemain/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  KeuanganRoute: typeof KeuanganRoute
+  KompetisiRoute: typeof KompetisiRoute
+  LatihanRoute: typeof LatihanRoute
+  PemainRoute: typeof PemainRouteWithChildren
+  PengaturanRoute: typeof PengaturanRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,22 +129,70 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/keuangan': {
+      id: '/keuangan'
+      path: '/keuangan'
+      fullPath: '/keuangan'
+      preLoaderRoute: typeof KeuanganRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/kompetisi': {
+      id: '/kompetisi'
+      path: '/kompetisi'
+      fullPath: '/kompetisi'
+      preLoaderRoute: typeof KompetisiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/latihan': {
+      id: '/latihan'
+      path: '/latihan'
+      fullPath: '/latihan'
+      preLoaderRoute: typeof LatihanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pemain': {
+      id: '/pemain'
+      path: '/pemain'
+      fullPath: '/pemain'
+      preLoaderRoute: typeof PemainRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pengaturan': {
+      id: '/pengaturan'
+      path: '/pengaturan'
+      fullPath: '/pengaturan'
+      preLoaderRoute: typeof PengaturanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pemain/$id': {
+      id: '/pemain/$id'
+      path: '/$id'
+      fullPath: '/pemain/$id'
+      preLoaderRoute: typeof PemainIdRouteImport
+      parentRoute: typeof PemainRoute
+    }
   }
 }
 
+interface PemainRouteChildren {
+  PemainIdRoute: typeof PemainIdRoute
+}
+
+const PemainRouteChildren: PemainRouteChildren = {
+  PemainIdRoute: PemainIdRoute,
+}
+
+const PemainRouteWithChildren =
+  PemainRoute._addFileChildren(PemainRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  KeuanganRoute: KeuanganRoute,
+  KompetisiRoute: KompetisiRoute,
+  LatihanRoute: LatihanRoute,
+  PemainRoute: PemainRouteWithChildren,
+  PengaturanRoute: PengaturanRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

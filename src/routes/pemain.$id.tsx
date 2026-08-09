@@ -7,24 +7,27 @@ import { Button } from "@/components/ui/button";
 import { playerById } from "@/lib/demo-data";
 
 export const Route = createFileRoute("/pemain/$id")({
-  beforeLoad: ({ params }) => {
+  loader: ({ params }) => {
     const player = playerById(params.id);
     if (!player) throw notFound();
     return { player };
   },
-  head: ({ context }) => ({
-    meta: [
-      { title: `${context.player.name} — bolaID Football OS` },
-      { name: "description", content: `Profil & statistik ${context.player.name} di SSB Garuda Muda.` },
-      { property: "og:title", content: `${context.player.name} — bolaID Football OS` },
-      { property: "og:description", content: `Profil pemain ${context.player.name} di ekosistem bolaID.` },
-    ],
-  }),
+  head: ({ loaderData }) => {
+    const name = loaderData?.player.name ?? "Pemain";
+    return {
+      meta: [
+        { title: `${name} — bolaID Football OS` },
+        { name: "description", content: `Profil & statistik ${name} di SSB Garuda Muda.` },
+        { property: "og:title", content: `${name} — bolaID Football OS` },
+        { property: "og:description", content: `Profil pemain ${name} di ekosistem bolaID.` },
+      ],
+    };
+  },
   component: PlayerDetailPage,
 });
 
 function PlayerDetailPage() {
-  const { player } = Route.useRouteContext();
+  const { player } = Route.useLoaderData();
 
   return (
     <>
