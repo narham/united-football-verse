@@ -54,7 +54,7 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup defaultOpen>
+        <SidebarGroup>
           <SidebarGroupLabel>Manajemen Klub</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
