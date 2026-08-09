@@ -1,14 +1,20 @@
 import { cn } from "@/lib/utils";
-import type { Position, PlayerStatus } from "@/lib/demo-data";
+import type { PlayerPosition, PlayerStatus } from "@/lib/demo-data";
 
-const posisiStyle: Record<Position, string> = {
+const posisiStyle: Record<PlayerPosition, string> = {
   GK: "bg-amber-500/15 text-amber-600 dark:text-amber-400 ring-amber-500/30",
   DF: "bg-blue-500/15 text-blue-600 dark:text-blue-400 ring-blue-500/30",
   MF: "bg-field/15 text-field ring-field/30",
   FW: "bg-energetic/25 text-energetic-foreground ring-energetic/40",
 };
 
-export function PositionBadge({ posisi, className }: { posisi: Position; className?: string }) {
+export function PositionBadge({
+  posisi,
+  className,
+}: {
+  posisi: PlayerPosition;
+  className?: string;
+}) {
   return (
     <span
       className={cn(
@@ -26,9 +32,16 @@ const statusStyle: Record<PlayerStatus, string> = {
   Aktif: "bg-win/15 text-win ring-win/30",
   Cadangan: "bg-muted text-muted-foreground ring-border",
   Cedera: "bg-loss/15 text-loss ring-loss/30",
+  Nonaktif: "bg-slate-500/15 text-slate-500 dark:text-slate-400 ring-slate-500/25",
 };
 
-export function StatusBadge({ status, className }: { status: PlayerStatus; className?: string }) {
+export function StatusBadge({
+  status,
+  className,
+}: {
+  status: PlayerStatus;
+  className?: string;
+}) {
   return (
     <span
       className={cn(
@@ -37,7 +50,7 @@ export function StatusBadge({ status, className }: { status: PlayerStatus; class
         className,
       )}
     >
-      <span className="h-1.5 w-1.5 rounded-full bg-current" />
+      <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden />
       {status}
     </span>
   );
