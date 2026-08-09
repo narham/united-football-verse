@@ -163,5 +163,21 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-sans);
   }
+}
+
+@utility font-display {
+  font-family: var(--font-display);
+  letter-spacing: 0.02em;
+}
+
+@utility pitch-lines {
+  background-image: repeating-linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--color-field) 8%, transparent) 0,
+    color-mix(in oklab, var(--color-field) 8%, transparent) 1px,
+    transparent 1px,
+    transparent 56px
+  );
 }
