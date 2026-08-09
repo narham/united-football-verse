@@ -88,8 +88,10 @@ function PemainPage() {
             />
           </div>
           <Button
-            className="gap-1.5 bg-field text-field-foreground hover:opacity-90"
-            aria-label="Tambah pemain baru"
+            disabled
+            className="gap-1.5 bg-field text-field-foreground hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+            aria-label="Tambah pemain baru — fitur ini memerlukan koneksi backend"
+            title="Fitur ini memerlukan koneksi backend (coming soon)"
           >
             <UserPlus className="h-4 w-4" aria-hidden /> Tambah Pemain
           </Button>

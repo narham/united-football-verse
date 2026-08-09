@@ -365,6 +365,14 @@ export function playerById(id: string): Player | undefined {
   return players.find((p) => p.id === id);
 }
 
+export function matchById(id: string): Match | undefined {
+  return matches.find((m) => m.id === id);
+}
+
+export function transactionById(id: string): Transaction | undefined {
+  return transactions.find((t) => t.id === id);
+}
+
 export function competitionById(id: string): Competition | undefined {
   return competitions.find((c) => c.id === id);
 }

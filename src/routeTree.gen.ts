@@ -10,16 +10,28 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AktivitasRouteImport } from './routes/aktivitas'
 import { Route as KeuanganRouteImport } from './routes/keuangan'
 import { Route as KompetisiRouteImport } from './routes/kompetisi'
 import { Route as LatihanRouteImport } from './routes/latihan'
+import { Route as MusimRouteImport } from './routes/musim'
+import { Route as NotifikasiRouteImport } from './routes/notifikasi'
 import { Route as PemainRouteImport } from './routes/pemain'
 import { Route as PengaturanRouteImport } from './routes/pengaturan'
+import { Route as StafRouteImport } from './routes/staf'
+import { Route as TimRouteImport } from './routes/tim'
+import { Route as KeuanganIdRouteImport } from './routes/keuangan.$id'
+import { Route as KompetisiIdRouteImport } from './routes/kompetisi.$id'
 import { Route as PemainIdRouteImport } from './routes/pemain.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AktivitasRoute = AktivitasRouteImport.update({
+  id: '/aktivitas',
+  path: '/aktivitas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const KeuanganRoute = KeuanganRouteImport.update({
@@ -37,6 +49,16 @@ const LatihanRoute = LatihanRouteImport.update({
   path: '/latihan',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MusimRoute = MusimRouteImport.update({
+  id: '/musim',
+  path: '/musim',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotifikasiRoute = NotifikasiRouteImport.update({
+  id: '/notifikasi',
+  path: '/notifikasi',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PemainRoute = PemainRouteImport.update({
   id: '/pemain',
   path: '/pemain',
@@ -47,6 +69,26 @@ const PengaturanRoute = PengaturanRouteImport.update({
   path: '/pengaturan',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StafRoute = StafRouteImport.update({
+  id: '/staf',
+  path: '/staf',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TimRoute = TimRouteImport.update({
+  id: '/tim',
+  path: '/tim',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KeuanganIdRoute = KeuanganIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => KeuanganRoute,
+} as any)
+const KompetisiIdRoute = KompetisiIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => KompetisiRoute,
+} as any)
 const PemainIdRoute = PemainIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -55,69 +97,116 @@ const PemainIdRoute = PemainIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/keuangan': typeof KeuanganRoute
-  '/kompetisi': typeof KompetisiRoute
+  '/aktivitas': typeof AktivitasRoute
+  '/keuangan': typeof KeuanganRouteWithChildren
+  '/kompetisi': typeof KompetisiRouteWithChildren
   '/latihan': typeof LatihanRoute
+  '/musim': typeof MusimRoute
+  '/notifikasi': typeof NotifikasiRoute
   '/pemain': typeof PemainRouteWithChildren
   '/pengaturan': typeof PengaturanRoute
+  '/staf': typeof StafRoute
+  '/tim': typeof TimRoute
+  '/keuangan/$id': typeof KeuanganIdRoute
+  '/kompetisi/$id': typeof KompetisiIdRoute
   '/pemain/$id': typeof PemainIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/keuangan': typeof KeuanganRoute
-  '/kompetisi': typeof KompetisiRoute
+  '/aktivitas': typeof AktivitasRoute
+  '/keuangan': typeof KeuanganRouteWithChildren
+  '/kompetisi': typeof KompetisiRouteWithChildren
   '/latihan': typeof LatihanRoute
+  '/musim': typeof MusimRoute
+  '/notifikasi': typeof NotifikasiRoute
   '/pemain': typeof PemainRouteWithChildren
   '/pengaturan': typeof PengaturanRoute
+  '/staf': typeof StafRoute
+  '/tim': typeof TimRoute
+  '/keuangan/$id': typeof KeuanganIdRoute
+  '/kompetisi/$id': typeof KompetisiIdRoute
   '/pemain/$id': typeof PemainIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/keuangan': typeof KeuanganRoute
-  '/kompetisi': typeof KompetisiRoute
+  '/aktivitas': typeof AktivitasRoute
+  '/keuangan': typeof KeuanganRouteWithChildren
+  '/kompetisi': typeof KompetisiRouteWithChildren
   '/latihan': typeof LatihanRoute
+  '/musim': typeof MusimRoute
+  '/notifikasi': typeof NotifikasiRoute
   '/pemain': typeof PemainRouteWithChildren
   '/pengaturan': typeof PengaturanRoute
+  '/staf': typeof StafRoute
+  '/tim': typeof TimRoute
+  '/keuangan/$id': typeof KeuanganIdRoute
+  '/kompetisi/$id': typeof KompetisiIdRoute
   '/pemain/$id': typeof PemainIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/aktivitas'
     | '/keuangan'
     | '/kompetisi'
     | '/latihan'
+    | '/musim'
+    | '/notifikasi'
     | '/pemain'
     | '/pengaturan'
+    | '/staf'
+    | '/tim'
+    | '/keuangan/$id'
+    | '/kompetisi/$id'
     | '/pemain/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/aktivitas'
     | '/keuangan'
     | '/kompetisi'
     | '/latihan'
+    | '/musim'
+    | '/notifikasi'
     | '/pemain'
     | '/pengaturan'
+    | '/staf'
+    | '/tim'
+    | '/keuangan/$id'
+    | '/kompetisi/$id'
     | '/pemain/$id'
   id:
     | '__root__'
     | '/'
+    | '/aktivitas'
     | '/keuangan'
     | '/kompetisi'
     | '/latihan'
+    | '/musim'
+    | '/notifikasi'
     | '/pemain'
     | '/pengaturan'
+    | '/staf'
+    | '/tim'
+    | '/keuangan/$id'
+    | '/kompetisi/$id'
     | '/pemain/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  KeuanganRoute: typeof KeuanganRoute
-  KompetisiRoute: typeof KompetisiRoute
+  AktivitasRoute: typeof AktivitasRoute
+  KeuanganRoute: typeof KeuanganRouteWithChildren
+  KompetisiRoute: typeof KompetisiRouteWithChildren
   LatihanRoute: typeof LatihanRoute
+  MusimRoute: typeof MusimRoute
+  NotifikasiRoute: typeof NotifikasiRoute
   PemainRoute: typeof PemainRouteWithChildren
   PengaturanRoute: typeof PengaturanRoute
+  StafRoute: typeof StafRoute
+  TimRoute: typeof TimRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -127,6 +216,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/aktivitas': {
+      id: '/aktivitas'
+      path: '/aktivitas'
+      fullPath: '/aktivitas'
+      preLoaderRoute: typeof AktivitasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/keuangan': {
@@ -150,6 +246,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LatihanRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/musim': {
+      id: '/musim'
+      path: '/musim'
+      fullPath: '/musim'
+      preLoaderRoute: typeof MusimRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notifikasi': {
+      id: '/notifikasi'
+      path: '/notifikasi'
+      fullPath: '/notifikasi'
+      preLoaderRoute: typeof NotifikasiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pemain': {
       id: '/pemain'
       path: '/pemain'
@@ -164,6 +274,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PengaturanRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/staf': {
+      id: '/staf'
+      path: '/staf'
+      fullPath: '/staf'
+      preLoaderRoute: typeof StafRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tim': {
+      id: '/tim'
+      path: '/tim'
+      fullPath: '/tim'
+      preLoaderRoute: typeof TimRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/keuangan/$id': {
+      id: '/keuangan/$id'
+      path: '/$id'
+      fullPath: '/keuangan/$id'
+      preLoaderRoute: typeof KeuanganIdRouteImport
+      parentRoute: typeof KeuanganRoute
+    }
+    '/kompetisi/$id': {
+      id: '/kompetisi/$id'
+      path: '/$id'
+      fullPath: '/kompetisi/$id'
+      preLoaderRoute: typeof KompetisiIdRouteImport
+      parentRoute: typeof KompetisiRoute
+    }
     '/pemain/$id': {
       id: '/pemain/$id'
       path: '/$id'
@@ -173,6 +311,30 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface KeuanganRouteChildren {
+  KeuanganIdRoute: typeof KeuanganIdRoute
+}
+
+const KeuanganRouteChildren: KeuanganRouteChildren = {
+  KeuanganIdRoute: KeuanganIdRoute,
+}
+
+const KeuanganRouteWithChildren = KeuanganRoute._addFileChildren(
+  KeuanganRouteChildren,
+)
+
+interface KompetisiRouteChildren {
+  KompetisiIdRoute: typeof KompetisiIdRoute
+}
+
+const KompetisiRouteChildren: KompetisiRouteChildren = {
+  KompetisiIdRoute: KompetisiIdRoute,
+}
+
+const KompetisiRouteWithChildren = KompetisiRoute._addFileChildren(
+  KompetisiRouteChildren,
+)
 
 interface PemainRouteChildren {
   PemainIdRoute: typeof PemainIdRoute
@@ -187,11 +349,16 @@ const PemainRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  KeuanganRoute: KeuanganRoute,
-  KompetisiRoute: KompetisiRoute,
+  AktivitasRoute: AktivitasRoute,
+  KeuanganRoute: KeuanganRouteWithChildren,
+  KompetisiRoute: KompetisiRouteWithChildren,
   LatihanRoute: LatihanRoute,
+  MusimRoute: MusimRoute,
+  NotifikasiRoute: NotifikasiRoute,
   PemainRoute: PemainRouteWithChildren,
   PengaturanRoute: PengaturanRoute,
+  StafRoute: StafRoute,
+  TimRoute: TimRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

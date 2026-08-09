@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Trophy, Plus, CalendarClock, Target, Award } from "lucide-react";
+import { Trophy, Plus, CalendarClock, Target, Award, ArrowRight, ChevronRight } from "lucide-react";
 import { createFileRoute } from "@tanstack/react-router";
 
 import { AppHeader } from "@/components/app-header";
@@ -96,9 +96,11 @@ function KompetisiPage() {
               const cMatches = matches.filter((m) => m.competitionId === c.id);
               const cPast = cMatches.filter((m) => m.skorHome !== null);
               return (
-                <article
+                <Link
                   key={c.id}
-                  className="rounded-xl border border-border bg-card p-4 transition-colors hover:border-field/40"
+                  to="/kompetisi/$id"
+                  params={{ id: c.id }}
+                  className="group block rounded-xl border border-border bg-card p-4 transition-all hover:border-field/50 hover:bg-card/80 hover:shadow-md"
                 >
                   <div className="flex items-start justify-between">
                     <div className="min-w-0">
@@ -109,9 +111,12 @@ function KompetisiPage() {
                         {c.level}
                       </p>
                     </div>
-                    <Badge variant="outline" className="text-xs shrink-0">
-                      {c.season}
-                    </Badge>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Badge variant="outline" className="text-xs">
+                        {c.season}
+                      </Badge>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-field" aria-hidden />
+                    </div>
                   </div>
                   <div className="mt-3 flex items-center gap-2 text-xs">
                     <Badge variant="outline" className="border-field/20 text-field bg-field/5">
@@ -123,7 +128,7 @@ function KompetisiPage() {
                       </Badge>
                     )}
                   </div>
-                </article>
+                </Link>
               );
             })}
           </div>
@@ -148,7 +153,9 @@ function KompetisiPage() {
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               {upcoming.map((m) => (
-                <MatchResultCard key={m.id} match={m} />
+                <Link key={m.id} to="/kompetisi/$id" params={{ id: m.id }}>
+                  <MatchResultCard match={m} />
+                </Link>
               ))}
             </div>
           </section>
@@ -169,7 +176,9 @@ function KompetisiPage() {
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             {past.map((m) => (
-              <MatchResultCard key={m.id} match={m} />
+              <Link key={m.id} to="/kompetisi/$id" params={{ id: m.id }}>
+                <MatchResultCard match={m} />
+              </Link>
             ))}
           </div>
           <p className="text-sm text-muted-foreground">

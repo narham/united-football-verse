@@ -2,9 +2,19 @@ import { useState } from "react";
 import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { CommandPalette } from "@/components/command-palette";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { useBreadcrumbs } from "@/hooks/use-breadcrumbs";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -252,37 +262,67 @@ export function AppHeader({
   subtitle?: string;
 }) {
   const [activeClub, setActiveClub] = useState<Club>(club);
+  const [commandOpen, setCommandOpen] = useState(false);
+  const breadcrumbs = useBreadcrumbs();
 
   return (
-    <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-border bg-card/80 px-4 py-3 backdrop-blur md:px-6">
-      <SidebarTrigger className="shrink-0" aria-label="Toggle navigasi sidebar" />
-      <div className="min-w-0 flex-1">
-        <h1 className="font-display text-2xl leading-none text-foreground md:text-3xl">
-          {title}
-        </h1>
-        {subtitle && (
-          <p className="mt-1 truncate text-sm text-muted-foreground">{subtitle}</p>
-        )}
+    <>
+      {/* Breadcrumb Navigation */}
+      <div className="border-b border-border bg-card/50 px-4 py-2 md:px-6">
+        <Breadcrumb>
+          <BreadcrumbList className="text-sm">
+            {breadcrumbs.map((crumb, index) => (
+              <BreadcrumbItem key={crumb.href || index}>
+                {index === breadcrumbs.length - 1 ? (
+                  <BreadcrumbPage className="font-medium text-foreground">
+                    {crumb.label}
+                  </BreadcrumbPage>
+                ) : (
+                  <>
+                    <BreadcrumbLink href={crumb.href} className="text-muted-foreground hover:text-foreground">
+                      {crumb.label}
+                    </BreadcrumbLink>
+                    <BreadcrumbSeparator className="mx-2" />
+                  </>
+                )}
+              </BreadcrumbItem>
+            ))}
+          </BreadcrumbList>
+        </Breadcrumb>
       </div>
 
-      <div className="hidden items-center gap-3 sm:flex">
-        <Badge
-          variant="outline"
-          className="gap-1.5 border-field/40 text-field md:hidden lg:inline-flex"
-        >
-          <span className="h-1.5 w-1.5 rounded-full bg-field" aria-hidden />
-          {activeClub.short} • {activeClub.city}
-        </Badge>
-        <span className="hidden text-sm font-medium text-muted-foreground md:inline">
-          Musim {activeClub.season}
-        </span>
-      </div>
+      {/* Main Header */}
+      <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-border bg-card/80 px-4 py-3 backdrop-blur md:px-6">
+        <SidebarTrigger className="shrink-0" aria-label="Toggle navigasi sidebar" />
+        <div className="min-w-0 flex-1">
+          <h1 className="font-display text-2xl leading-none text-foreground md:text-3xl">
+            {title}
+          </h1>
+          {subtitle && (
+            <p className="mt-1 truncate text-sm text-muted-foreground">{subtitle}</p>
+          )}
+        </div>
 
-      <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
-        <ClubSwitcher current={activeClub} onChange={setActiveClub} />
-        <NotificationBell />
-        <ProfileMenu />
-      </div>
-    </header>
+        <div className="hidden items-center gap-3 sm:flex">
+          <Badge
+            variant="outline"
+            className="gap-1.5 border-field/40 text-field md:hidden lg:inline-flex"
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-field" aria-hidden />
+            {activeClub.short} • {activeClub.city}
+          </Badge>
+          <span className="hidden text-sm font-medium text-muted-foreground md:inline">
+            Musim {activeClub.season}
+          </span>
+        </div>
+
+        <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+          <CommandPalette open={commandOpen} onOpenChange={setCommandOpen} />
+          <ClubSwitcher current={activeClub} onChange={setActiveClub} />
+          <NotificationBell />
+          <ProfileMenu />
+        </div>
+      </header>
+    </>
   );
 }

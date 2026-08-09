@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { TrendingUp, TrendingDown, Filter } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -128,11 +129,12 @@ export function FinanceSummary({
           </div>
           <ul className="divide-y divide-border" role="list" aria-label="Daftar transaksi">
             {transactions.map((t) => (
-              <li
-                key={t.id}
-                className="flex items-center gap-3 px-4 py-3"
-                role="listitem"
-              >
+              <li key={t.id} role="listitem">
+                <Link
+                  to="/keuangan/$id"
+                  params={{ id: t.id }}
+                  className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/40"
+                >
                 <span
                   className={cn(
                     "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
@@ -183,6 +185,7 @@ export function FinanceSummary({
                     })}
                   </p>
                 </div>
+                </Link>
               </li>
             ))}
           </ul>
