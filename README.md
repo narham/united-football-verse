@@ -1,14 +1,128 @@
-# Welcome to your Lovable project
+# Football Ecosystem Hub
+
+Target Produk
+
+Kita akan membangun platform dengan nama sementara:
+
+bolaID
+
+One Identity. One Journey. One Football Ecosystem.
+
+Produk utama terdiri dari:
+
+ Football ID
+
+ Football OS (SSB/Club Management)
+
+ Competition Platform
+
+ Development Engine
+
+ Football Intelligence (AI)
+
+Teknologi
+
+Saya menyarankan stack berikut.
+
+Frontend
+
+ Next.js 15
+
+ React
+
+ TypeScript
+
+ Tailwind CSS
+
+ shadcn/ui
+
+ TanStack Query
+
+Backend
+
+ Supabase
+
+ PostgreSQL
+
+ Edge Functions
+
+ Storage
+
+ Realtime
+
+Mobile
+
+ React Native (Expo)
+
+Deployment
+
+ Vercel
+
+ Supabase Cloud
+
+Dokumentasi
+
+ OpenAPI
+
+ Storybook
+
+ Enterprise Architecture Repository (EAR)
+
+Arsitektur
+
+Web
+Mobile
+Admin
+
+        │
+
+API Gateway
+
+        │
+
+Application Layer
+
+        │
+
+──────────────────────────
+
+Football ID
+
+Organization
+
+Competition
+
+Training
+
+Development
+
+Payment
+
+Notification
+
+Analytics
+
+──────────────────────────
+
+Supabase
+
+PostgreSQL
+
+Storage
+
+Realtime
+
+Edge Functions
 
 This project was built with [Lovable](https://lovable.dev).
 
 ## Build with Lovable
 
-Open your project in the [Lovable editor](https://lovable.dev) and keep building.
+Continue developing this project in the [Lovable editor](https://lovable.dev/projects/15d9379d-1cef-47d5-b3d1-6651ce256080).
 
 - **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
-- **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
+- **Stay in sync**: every change made in Lovable is committed straight to this repository.
+- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
 
 ## Development
 
@@ -20,10 +134,3 @@ cd <repository-name>
 npm i
 npm run dev
 ```
-
-## Built with
-
-- TanStack Start
-- TypeScript
-- React
-- Tailwind CSS
