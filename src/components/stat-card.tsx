@@ -19,17 +19,20 @@ const toneStyle: Record<NonNullable<StatCardProps["tone"]>, string> = {
 
 export function StatCard({ label, value, hint, icon: Icon, tone = "field" }: StatCardProps) {
   return (
-    <div className="group relative overflow-hidden rounded-xl border border-border bg-card p-4 transition-shadow hover:shadow-md">
+    <article 
+      className="group relative overflow-hidden rounded-xl border border-border bg-card p-4 transition-shadow hover:shadow-md"
+      aria-label={`${label}: ${value}${hint ? `. ${hint}` : ""}`}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
-          <p className="mt-2 font-display text-3xl leading-none text-foreground">{value}</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground" id={`stat-${label}`}>{label}</p>
+          <p className="mt-2 font-display text-3xl leading-none text-foreground" aria-describedby={`stat-${label}`}>{value}</p>
           {hint && <p className="mt-1.5 text-xs text-muted-foreground">{hint}</p>}
         </div>
-        <span className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-lg", toneStyle[tone])}>
+        <span className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-lg", toneStyle[tone])} aria-hidden="true">
           <Icon className="h-5 w-5" />
         </span>
       </div>
-    </div>
+    </article>
   );
 }

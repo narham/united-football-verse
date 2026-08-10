@@ -13,25 +13,17 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
+import { ErrorState } from "@/components/error-state";
 
 function NotFoundComponent() {
   return (
     <div className="flex min-h-[60vh] items-center justify-center px-4">
-      <div className="max-w-md text-center">
-        <h1 className="font-display text-7xl text-field">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Halaman tidak ditemukan</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Halaman yang Anda cari tidak ada atau telah dipindahkan.
-        </p>
-        <div className="mt-6">
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center rounded-md bg-field px-4 py-2 text-sm font-medium text-field-foreground transition-colors hover:opacity-90"
-          >
-            Kembali ke Dashboard
-          </Link>
-        </div>
-      </div>
+      <ErrorState 
+        type="not-found"
+        title="Halaman tidak ditemukan"
+        description="Halaman yang Anda cari tidak ada atau telah dipindahkan."
+        showReportButton={false}
+      />
     </div>
   );
 }
@@ -43,33 +35,23 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
 
+  const isNetworkError = error instanceof TypeError && error.message.includes("fetch");
+  const errorType = isNetworkError ? "network-error" : "server-error";
+
   return (
     <div className="flex min-h-[60vh] items-center justify-center px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          Halaman ini tidak dapat dimuat
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Terjadi kesalahan di sisi kami. Coba muat ulang atau kembali ke dashboard.
-        </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
-          <button
-            onClick={() => {
-              router.invalidate();
-              reset();
-            }}
-            className="inline-flex items-center justify-center rounded-md bg-field px-4 py-2 text-sm font-medium text-field-foreground transition-colors hover:opacity-90"
-          >
-            Coba lagi
-          </button>
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
-          >
-            Dashboard
-          </Link>
-        </div>
-      </div>
+      <ErrorState 
+        type={errorType}
+        title={isNetworkError ? "Masalah koneksi jaringan" : "Kesalahan server"}
+        description={isNetworkError 
+          ? "Tidak dapat terhubung ke server. Periksa koneksi internet Anda dan coba lagi."
+          : "Terjadi kesalahan di sisi kami. Tim kami telah diberitahu dan sedang menanganinya."}
+        onRetry={() => {
+          router.invalidate();
+          reset();
+        }}
+        showReportButton
+      />
     </div>
   );
 }

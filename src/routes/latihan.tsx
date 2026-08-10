@@ -23,8 +23,20 @@ export const Route = createFileRoute("/latihan")({
 function LatihanPage() {
   return (
     <>
-      <AppHeader title="Latihan" subtitle={`${trainingSessions.length} sesi per minggu`} />
-      <main className="flex-1 space-y-4 p-4 md:p-6">
+      <AppHeader title="Latihan" subtitle={`${trainingSessions.length} sesi per minggu • Fokus minggu ini: Akselerasi passing`} />
+      <main className="flex-1 space-y-6 p-4 md:p-6">
+        {/* Welcome Banner */}
+        <div className="rounded-2xl border border-border bg-gradient-to-br from-energetic/10 via-card to-card p-5">
+          <div className="flex items-start justify-between">
+            <div>
+              <h2 className="font-display text-xl text-foreground">Minggu ini: Fokus pada kondisi fisik 💪</h2>
+              <p className="mt-2 text-sm text-muted-foreground max-w-2xl">
+                Sesi latihan dirancang untuk meningkatkan power endurance dan akselerasi passing pendek. Recovery session pada Sabtu mempersiapkan pertandingan minggu depan.
+              </p>
+            </div>
+          </div>
+        </div>
+
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
             Jadwal latihan reguler musim 2026/2027
@@ -44,16 +56,19 @@ function LatihanPage() {
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
                 <Users2 className="h-5 w-5 text-field" aria-hidden />
-                <h2 className="font-display text-xl text-foreground">Attendance snapshot</h2>
+                <h3 className="font-semibold text-foreground">Kehadiran minggu lalu</h3>
               </div>
               <div className="mt-4 space-y-3">
                 {[
-                  { label: "Hadir", value: "17/20" },
-                  { label: "Sakit/izin", value: "2" },
-                  { label: "Terlambat", value: "1" },
+                  { label: "Hadir", value: "17/20", tone: "field" },
+                  { label: "Sakit/Izin", value: "2", tone: "energetic" },
+                  { label: "Terlambat", value: "1", tone: "draw" },
                 ].map((item) => (
                   <div key={item.label} className="flex items-center justify-between rounded-lg border border-border bg-muted/30 px-3 py-2">
-                    <span className="text-sm text-muted-foreground">{item.label}</span>
+                    <div className="flex items-center gap-2">
+                      <div className={`h-2 w-2 rounded-full bg-${item.tone}`} aria-hidden />
+                      <span className="text-sm text-muted-foreground">{item.label}</span>
+                    </div>
                     <span className="font-semibold text-foreground">{item.value}</span>
                   </div>
                 ))}
@@ -65,15 +80,22 @@ function LatihanPage() {
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-5 w-5 text-win" aria-hidden />
-                <h2 className="font-display text-xl text-foreground">Catatan sesi minggu ini</h2>
+                <h3 className="font-semibold text-foreground">Tema latihan minggu ini</h3>
               </div>
               <div className="mt-4 space-y-3 text-sm text-muted-foreground">
-                <p>Fokus minggu ini: akselerasi passing pendek dan penguatan fisik power endurance.</p>
-                <div className="flex flex-wrap gap-2">
-                  <Badge variant="outline" className="border-field/20 bg-field/5 text-field">Passing</Badge>
-                  <Badge variant="outline" className="border-energetic/20 bg-energetic/10 text-energetic-foreground">Conditioning</Badge>
-                  <Badge variant="outline" className="border-draw/20 bg-draw/5 text-draw">Recovery</Badge>
+                <div>
+                  <p className="font-medium text-foreground mb-2">🎯 Fokus utama</p>
+                  <ul className="space-y-1 text-sm">
+                    <li>• Akselerasi passing pendek (10 min)</li>
+                    <li>• Power endurance circuit (25 min)</li>
+                    <li>• Situasi pertandingan (20 min)</li>
+                  </ul>
                 </div>
+              </div>
+              <div className="mt-4 flex flex-wrap gap-1.5">
+                <Badge variant="outline" className="border-field/20 bg-field/5 text-field text-xs">Passing</Badge>
+                <Badge variant="outline" className="border-energetic/20 bg-energetic/10 text-energetic-foreground text-xs">Conditioning</Badge>
+                <Badge variant="outline" className="border-draw/20 bg-draw/5 text-draw text-xs">Tactic</Badge>
               </div>
             </CardContent>
           </Card>

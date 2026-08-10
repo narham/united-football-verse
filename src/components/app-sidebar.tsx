@@ -114,21 +114,36 @@ export function AppSidebar() {
       <SidebarContent>
         {menuSections.map((section) => (
           <SidebarGroup key={section.title}>
-            <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70 px-2 py-1.5">
+            <SidebarGroupLabel 
+              className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70 px-2 py-1.5"
+              aria-label={`${section.title} - Navigation section`}
+            >
               {!collapsed && section.title}
             </SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu>
+              <SidebarMenu role="navigation" aria-label={`${section.title} navigation`}>
                 {section.items.map((item) => {
                   const badgeValue = item.badge ? item.badge() : undefined;
+                  const ariaLabel = badgeValue !== undefined && badgeValue > 0 
+                    ? `${item.title}, ${badgeValue} items`
+                    : item.title;
                   return (
                     <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton asChild isActive={isActive(item.url)}>
-                        <Link to={item.url} className="flex items-center gap-2.5">
-                          <item.icon className="h-4.5 w-4.5 shrink-0" />
+                      <SidebarMenuButton 
+                        asChild 
+                        isActive={isActive(item.url)}
+                        aria-label={ariaLabel}
+                        aria-current={isActive(item.url) ? "page" : undefined}
+                      >
+                        <Link to={item.url} className="flex items-center gap-2.5" title={item.title}>
+                          <item.icon className="h-4.5 w-4.5 shrink-0" aria-hidden />
                           <span className="flex-1">{item.title}</span>
                           {!collapsed && badgeValue !== undefined && badgeValue > 0 && (
-                            <Badge variant="secondary" className="ml-auto text-[10px] font-semibold">
+                            <Badge 
+                              variant="secondary" 
+                              className="ml-auto text-[10px] font-semibold"
+                              aria-label={`${badgeValue} items`}
+                            >
                               {badgeValue > 99 ? "99+" : badgeValue}
                             </Badge>
                           )}

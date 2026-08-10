@@ -4,6 +4,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AlertTriangle, Database, RefreshCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+// Re-export comprehensive error state components
+export { ErrorState, FormFieldError, ErrorBanner } from "@/components/error-state";
+export type { ErrorType } from "@/components/error-state";
+
 // ============================================================
 // Unified Data State Wrappers — spec §28
 // Setiap halaman/data view memiliki konsep: Loading / Empty / Error / Success
