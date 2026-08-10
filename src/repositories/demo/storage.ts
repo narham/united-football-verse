@@ -6,6 +6,41 @@
 
 const STORAGE_PREFIX = "bolaID.demo";
 
+/**
+ * SSR-safe storage backend.
+ * During server rendering `localStorage` does not exist, so we fall back to an
+ * in-memory Storage-like object instead of throwing.
+ */
+const memoryStore = new Map<string, string>();
+
+const memoryStorage = {
+  getItem: (k: string) => memoryStore.get(k) ?? null,
+  setItem: (k: string, v: string) => void memoryStore.set(k, v),
+  removeItem: (k: string) => void memoryStore.delete(k),
+  get length() {
+    return memoryStore.size;
+  },
+  key: (i: number) => Array.from(memoryStore.keys())[i] ?? null,
+  clear: () => memoryStore.clear(),
+};
+
+function store(): Storage {
+  if (typeof globalThis !== "undefined" && typeof globalThis.localStorage !== "undefined") {
+    return globalThis.localStorage;
+  }
+  return memoryStorage as unknown as Storage;
+}
+
+function storeKeys(): string[] {
+  const s = store();
+  const keys: string[] = [];
+  for (let i = 0; i < s.length; i++) {
+    const k = s.key(i);
+    if (k) keys.push(k);
+  }
+  return keys;
+}
+
 export interface StorageConfig {
   prefix?: string;
   debug?: boolean;
@@ -40,7 +75,7 @@ export class DemoStorage {
     try {
       const key = this.getKey(entity, subKey);
       const json = JSON.stringify(data);
-      localStorage.setItem(key, json);
+      store().setItem(key, json);
       if (this.debug) {
         console.log(`[DemoStorage] Set ${key}`, data);
       }
@@ -58,7 +93,7 @@ export class DemoStorage {
   public get<T>(entity: string, subKey?: string, defaultValue?: T): T | null {
     try {
       const key = this.getKey(entity, subKey);
-      const json = localStorage.getItem(key);
+      const json = store().getItem(key);
       if (!json) {
         return (defaultValue ?? null) as T | null;
       }
@@ -78,7 +113,7 @@ export class DemoStorage {
    */
   public has(entity: string, subKey?: string): boolean {
     const key = this.getKey(entity, subKey);
-    return localStorage.getItem(key) !== null;
+    return store().getItem(key) !== null;
   }
 
   /**
@@ -87,7 +122,7 @@ export class DemoStorage {
   public remove(entity: string, subKey?: string): void {
     try {
       const key = this.getKey(entity, subKey);
-      localStorage.removeItem(key);
+      store().removeItem(key);
       if (this.debug) {
         console.log(`[DemoStorage] Removed ${key}`);
       }
@@ -101,12 +136,12 @@ export class DemoStorage {
    */
   public clear(entity?: string): void {
     try {
-      const keys = Object.keys(localStorage);
+      const keys = storeKeys();
       const prefix = entity ? this.getKey(entity) : this.prefix;
 
       for (const key of keys) {
         if (key.startsWith(prefix)) {
-          localStorage.removeItem(key);
+          store().removeItem(key);
           if (this.debug) {
             console.log(`[DemoStorage] Cleared ${key}`);
           }
@@ -122,7 +157,7 @@ export class DemoStorage {
    */
   public getKeys(entity: string): string[] {
     try {
-      const keys = Object.keys(localStorage);
+      const keys = storeKeys();
       const prefix = this.getKey(entity);
       return keys.filter((k) => k.startsWith(prefix));
     } catch (e) {
