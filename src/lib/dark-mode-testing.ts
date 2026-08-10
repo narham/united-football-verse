@@ -26,7 +26,7 @@ interface ContrastResult {
  */
 function hexToRgb(hex: string): ColorValue | null {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result
+  return result && result[1] && result[2] && result[3]
     ? {
         r: parseInt(result[1], 16),
         g: parseInt(result[2], 16),
@@ -41,10 +41,10 @@ function hexToRgb(hex: string): ColorValue | null {
 function getLuminance(rgb: ColorValue): number {
   const { r, g, b } = rgb;
   const [rs, gs, bs] = [r, g, b].map((c) => {
-    c = c / 255;
-    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
-  });
-  return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+    let normalized = c / 255;
+    return normalized <= 0.03928 ? normalized / 12.92 : Math.pow((normalized + 0.055) / 1.055, 2.4);
+  }) as number[];
+  return 0.2126 * (rs ?? 0) + 0.7152 * (gs ?? 0) + 0.0722 * (bs ?? 0);
 }
 
 /**

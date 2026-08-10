@@ -7,11 +7,9 @@ import { PlayerTable } from "@/components/player-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Toggle } from "@/components/ui/toggle";
-import {
-  players,
-  type PlayerPosition,
-  type PlayerStatus,
-} from "@/lib/demo-data";
+import { usePlayers } from "@/hooks/usePlayers";
+import { DefaultLoadingState, DefaultEmptyState } from "@/components/data-state";
+import type { PlayerPosition, PlayerStatus } from "@/repositories/interfaces";
 
 export const Route = createFileRoute("/pemain")({
   head: () => ({
@@ -51,6 +49,8 @@ function PemainPage() {
   const [posisi, setPosisi] = useState<PlayerPosition | "ALL">("ALL");
   const [status, setStatus] = useState<PlayerStatus | "ALL">("ALL");
   const [q, setQ] = useState("");
+  
+  const { data: players = [], isLoading, error } = usePlayers();
 
   const filtered = useMemo(
     () =>
@@ -62,8 +62,21 @@ function PemainPage() {
             p.name.toLowerCase().includes(q.toLowerCase()) ||
             p.football_id.toLowerCase().includes(q.toLowerCase())),
       ),
-    [posisi, status, q],
+    [posisi, status, q, players],
   );
+
+  if (isLoading) {
+    return <DefaultLoadingState message="Memuat daftar pemain..." />;
+  }
+
+  if (error) {
+    return (
+      <DefaultEmptyState
+        title="Terjadi kesalahan"
+        description="Gagal memuat daftar pemain. Silakan coba lagi."
+      />
+    );
+  }
 
   return (
     <>
