@@ -66,6 +66,7 @@ export interface Player {
   tinggi: number;
   berat: number;
   kaki: "Kiri" | "Kanan";
+  citizenship?: "INDONESIAN" | "FOREIGN";
   fotoUrl?: string;
   stats: SeasonStat[];
   createdAt?: string;
@@ -237,6 +238,7 @@ export interface CreatePlayerInput {
   tinggi: number;
   berat: number;
   kaki: "Kiri" | "Kanan";
+  citizenship?: "INDONESIAN" | "FOREIGN";
   fotoUrl?: string;
 }
 

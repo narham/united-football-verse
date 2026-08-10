@@ -9,6 +9,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PositionBadge, StatusBadge } from "@/components/position-badge";
 import { DefaultEmptyState } from "@/components/data-state";
+import { PlayerIdentitySection } from "@/components/player-identity-section";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
@@ -320,6 +321,11 @@ export function PlayerProfileCard({ player }: { player: Player }) {
           Ringkasan Performa
         </h3>
         <PerformanceSummary player={player} />
+      </section>
+
+      {/* Identity & Citizenship Section */}
+      <section aria-label="Identitas dan kewarganegaraan pemain">
+        <PlayerIdentitySection player={player} />
       </section>
 
       {/* Season Stats Tab */}

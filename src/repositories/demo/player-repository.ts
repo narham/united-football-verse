@@ -114,6 +114,7 @@ export class DemoPlayerRepository implements PlayerRepository {
 
     // Create new player
     const fotoUrl = input.fotoUrl !== undefined ? input.fotoUrl : undefined;
+    const citizenship = input.citizenship !== undefined ? input.citizenship : undefined;
     const newPlayer: Player = {
       id: newId,
       clubId,
@@ -127,6 +128,7 @@ export class DemoPlayerRepository implements PlayerRepository {
       berat: input.berat,
       kaki: input.kaki,
       ...(fotoUrl !== undefined && { fotoUrl }),
+      ...(citizenship !== undefined && { citizenship }),
       stats: [
         { season: "2025/2026", apps: 0, goals: 0, assists: 0, minutes: 0 },
         { season: "2024/2025", apps: 0, goals: 0, assists: 0, minutes: 0 },
@@ -162,6 +164,7 @@ export class DemoPlayerRepository implements PlayerRepository {
     const player = allPlayers[playerIndex]!;
     const oldData = JSON.stringify(player);
     const fotoUrl = input.fotoUrl !== undefined ? input.fotoUrl : player.fotoUrl;
+    const citizenship = input.citizenship !== undefined ? input.citizenship : player.citizenship;
 
     // Update player (note: football_id is immutable)
     const updated: Player = {
@@ -177,6 +180,7 @@ export class DemoPlayerRepository implements PlayerRepository {
       berat: input.berat ?? player.berat,
       kaki: input.kaki ?? player.kaki,
       ...(fotoUrl !== undefined && { fotoUrl }),
+      ...(citizenship !== undefined && { citizenship }),
       stats: player.stats,
       createdAt: player.createdAt ?? new Date().toISOString(),
       updatedAt: new Date().toISOString(),
