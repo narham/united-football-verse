@@ -14,6 +14,7 @@ import { Route as AktivitasRouteImport } from './routes/aktivitas'
 import { Route as KeuanganRouteImport } from './routes/keuangan'
 import { Route as KompetisiRouteImport } from './routes/kompetisi'
 import { Route as LatihanRouteImport } from './routes/latihan'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as MusimRouteImport } from './routes/musim'
 import { Route as NotifikasiRouteImport } from './routes/notifikasi'
 import { Route as PemainRouteImport } from './routes/pemain'
@@ -47,6 +48,11 @@ const KompetisiRoute = KompetisiRouteImport.update({
 const LatihanRoute = LatihanRouteImport.update({
   id: '/latihan',
   path: '/latihan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MusimRoute = MusimRouteImport.update({
@@ -101,6 +107,7 @@ export interface FileRoutesByFullPath {
   '/keuangan': typeof KeuanganRouteWithChildren
   '/kompetisi': typeof KompetisiRouteWithChildren
   '/latihan': typeof LatihanRoute
+  '/login': typeof LoginRoute
   '/musim': typeof MusimRoute
   '/notifikasi': typeof NotifikasiRoute
   '/pemain': typeof PemainRouteWithChildren
@@ -117,6 +124,7 @@ export interface FileRoutesByTo {
   '/keuangan': typeof KeuanganRouteWithChildren
   '/kompetisi': typeof KompetisiRouteWithChildren
   '/latihan': typeof LatihanRoute
+  '/login': typeof LoginRoute
   '/musim': typeof MusimRoute
   '/notifikasi': typeof NotifikasiRoute
   '/pemain': typeof PemainRouteWithChildren
@@ -134,6 +142,7 @@ export interface FileRoutesById {
   '/keuangan': typeof KeuanganRouteWithChildren
   '/kompetisi': typeof KompetisiRouteWithChildren
   '/latihan': typeof LatihanRoute
+  '/login': typeof LoginRoute
   '/musim': typeof MusimRoute
   '/notifikasi': typeof NotifikasiRoute
   '/pemain': typeof PemainRouteWithChildren
@@ -152,6 +161,7 @@ export interface FileRouteTypes {
     | '/keuangan'
     | '/kompetisi'
     | '/latihan'
+    | '/login'
     | '/musim'
     | '/notifikasi'
     | '/pemain'
@@ -168,6 +178,7 @@ export interface FileRouteTypes {
     | '/keuangan'
     | '/kompetisi'
     | '/latihan'
+    | '/login'
     | '/musim'
     | '/notifikasi'
     | '/pemain'
@@ -184,6 +195,7 @@ export interface FileRouteTypes {
     | '/keuangan'
     | '/kompetisi'
     | '/latihan'
+    | '/login'
     | '/musim'
     | '/notifikasi'
     | '/pemain'
@@ -201,6 +213,7 @@ export interface RootRouteChildren {
   KeuanganRoute: typeof KeuanganRouteWithChildren
   KompetisiRoute: typeof KompetisiRouteWithChildren
   LatihanRoute: typeof LatihanRoute
+  LoginRoute: typeof LoginRoute
   MusimRoute: typeof MusimRoute
   NotifikasiRoute: typeof NotifikasiRoute
   PemainRoute: typeof PemainRouteWithChildren
@@ -244,6 +257,13 @@ declare module '@tanstack/react-router' {
       path: '/latihan'
       fullPath: '/latihan'
       preLoaderRoute: typeof LatihanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/musim': {
@@ -353,6 +373,7 @@ const rootRouteChildren: RootRouteChildren = {
   KeuanganRoute: KeuanganRouteWithChildren,
   KompetisiRoute: KompetisiRouteWithChildren,
   LatihanRoute: LatihanRoute,
+  LoginRoute: LoginRoute,
   MusimRoute: MusimRoute,
   NotifikasiRoute: NotifikasiRoute,
   PemainRoute: PemainRouteWithChildren,

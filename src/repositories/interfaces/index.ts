@@ -56,7 +56,21 @@ import type {
   IdentityVerificationStatus,
 } from "../../domain/identity/identity-document";
 
-import type { IdentityDocumentRepository } from "./identity-document-repository";
+import type {
+  IdentityDocumentRepository,
+} from "./identity-document-repository";
+
+import type {
+  AuthRepository,
+} from "../auth/auth-repository";
+
+import type {
+  UserProfileRepository,
+} from "../user-profile/user-profile-repository";
+
+import type {
+  MembershipRepository,
+} from "../membership/membership-repository";
 
 export type {
   Player,
@@ -258,6 +272,13 @@ export interface OrganizationRepository {
 export type { IdentityDocumentRepository } from "./identity-document-repository";
 
 // ============================================================
+// Authentication Repositories (STEP 4)
+// ============================================================
+export type { AuthRepository } from "../auth/auth-repository";
+export type { UserProfileRepository } from "../user-profile/user-profile-repository";
+export type { MembershipRepository } from "../membership/membership-repository";
+
+// ============================================================
 // Repository Container (Dependency Injection)
 // ============================================================
 export interface Repositories {
@@ -273,6 +294,9 @@ export interface Repositories {
   activity: ActivityRepository;
   organization: OrganizationRepository;
   identityDocument: IdentityDocumentRepository;
+  auth: AuthRepository;
+  userProfile: UserProfileRepository;
+  membership: MembershipRepository;
 }
 
 // ============================================================

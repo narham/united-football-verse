@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
@@ -38,28 +39,61 @@ import {
 } from "lucide-react";
 import { club, clubs, type Club } from "@/lib/demo-data";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/auth/auth-context";
+import { useOrganization } from "@/lib/auth/organization-context";
 
-function ClubSwitcher({
-  current,
-  onChange,
-}: {
-  current: Club;
-  onChange: (c: Club) => void;
-}) {
+function ClubSwitcher() {
+  const { memberships, currentMembership, switchOrganization, isLoading } = useOrganization();
   const [open, setOpen] = useState(false);
+
+  // Find display name for current organization
+  // For now, we'll show the organization ID since we don't have org names in the demo
+  const getCurrentOrgDisplay = () => {
+    if (!currentMembership) return "Org";
+    
+    // Try to find matching demo club
+    const matchingClub = clubs.find((c) => c.id === currentMembership.organizationId);
+    if (matchingClub) {
+      return matchingClub.short.slice(0, 2);
+    }
+    
+    return currentMembership.organizationId.slice(0, 2).toUpperCase();
+  };
+
+  const getCurrentOrgName = () => {
+    if (!currentMembership) return "Select Organization";
+    
+    const matchingClub = clubs.find((c) => c.id === currentMembership.organizationId);
+    if (matchingClub) {
+      return matchingClub.name;
+    }
+    
+    return currentMembership.organizationId;
+  };
+
+  const handleSwitchOrg = async (organizationId: string) => {
+    try {
+      await switchOrganization(organizationId);
+      setOpen(false);
+    } catch (error) {
+      console.error("Failed to switch organization:", error);
+    }
+  };
+
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
           className="hidden items-center gap-2 h-9 md:inline-flex"
-          aria-label={`Pilih klub. Saat ini: ${current.name}`}
+          aria-label={`Pilih klub. Saat ini: ${getCurrentOrgName()}`}
+          disabled={isLoading || memberships.length === 0}
         >
           <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded bg-field text-[10px] font-bold text-field-foreground">
-            {current.short.slice(0, 2)}
+            {getCurrentOrgDisplay()}
           </span>
           <span className="text-sm font-medium text-foreground max-w-[140px] truncate">
-            {current.name}
+            {getCurrentOrgName()}
           </span>
           <ChevronDown
             className={cn("h-4 w-4 transition-transform", open && "rotate-180")}
@@ -68,31 +102,46 @@ function ClubSwitcher({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-64">
-        <DropdownMenuLabel>Organisasi Aktif</DropdownMenuLabel>
+        <DropdownMenuLabel>Organisasi Anda</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          {clubs.map((c) => (
-            <DropdownMenuItem
-              key={c.id}
-              onClick={() => onChange(c)}
-              className="gap-2.5 cursor-pointer"
-            >
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-field/15 text-[10px] font-bold text-field">
-                {c.short.slice(0, 2)}
-              </span>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5">
-                  <span className="truncate text-sm font-medium">{c.name}</span>
-                  {c.id === current.id && (
-                    <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-field" aria-hidden />
-                  )}
-                </div>
-                <span className="truncate text-xs text-muted-foreground">
-                  {c.city} • {c.sport}
-                </span>
-              </div>
+          {memberships.length === 0 ? (
+            <DropdownMenuItem disabled className="text-muted-foreground text-xs">
+              No organizations found
             </DropdownMenuItem>
-          ))}
+          ) : (
+            memberships.map((membership) => {
+              const matchingClub = clubs.find((c) => c.id === membership.organizationId);
+              const clubShort = matchingClub?.short.slice(0, 2) || membership.organizationId.slice(0, 2).toUpperCase();
+              const clubName = matchingClub?.name || membership.organizationId;
+              const clubCity = matchingClub?.city;
+              const clubSport = matchingClub?.sport;
+
+              return (
+                <DropdownMenuItem
+                  key={membership.id}
+                  onClick={() => handleSwitchOrg(membership.organizationId)}
+                  className="gap-2.5 cursor-pointer"
+                  disabled={isLoading}
+                >
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-field/15 text-[10px] font-bold text-field">
+                    {clubShort}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5">
+                      <span className="truncate text-sm font-medium">{clubName}</span>
+                      {currentMembership?.organizationId === membership.organizationId && (
+                        <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-field" aria-hidden />
+                      )}
+                    </div>
+                    <span className="truncate text-xs text-muted-foreground">
+                      {clubCity && clubSport ? `${clubCity} • ${clubSport}` : membership.role}
+                    </span>
+                  </div>
+                </DropdownMenuItem>
+              );
+            })
+          )}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem disabled className="gap-2.5 text-muted-foreground cursor-not-allowed">
@@ -194,27 +243,71 @@ function NotificationBell() {
 }
 
 function ProfileMenu() {
-  const user = {
-    name: "Agus Setiawan",
-    role: "Manager Klub",
-    email: "agus.setiawan@garudamuda.id",
-    initials: "AS",
+  const navigate = useNavigate();
+  const { profile, signOut, isLoading: isAuthLoading } = useAuth();
+  const { currentMembership } = useOrganization();
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
+  // Get user initials from display name or email
+  const getInitials = (displayName?: string, email?: string) => {
+    if (displayName) {
+      const parts = displayName.split(" ");
+      return parts.map((p) => p[0]).join("").toUpperCase().slice(0, 2);
+    }
+    if (email) {
+      return email.slice(0, 2).toUpperCase();
+    }
+    return "??";
   };
+
+  const initials = getInitials(profile?.displayName, profile?.email);
+  const displayName = profile?.displayName || profile?.email || "User";
+  const email = profile?.email || "no-email@bolaid.id";
+  
+  // Get role from current organization membership
+  const role = currentMembership?.role || "VIEWER";
+
+  // Handle sign out
+  const handleSignOut = async () => {
+    try {
+      setIsSigningOut(true);
+      await signOut();
+      navigate({ to: "/login" });
+    } catch (error) {
+      console.error("Sign out error:", error);
+    } finally {
+      setIsSigningOut(false);
+    }
+  };
+
+  if (!profile) {
+    return (
+      <Button
+        variant="ghost"
+        className="gap-2 h-9 px-2 md:px-3"
+        onClick={() => navigate({ to: "/login" })}
+      >
+        <UserCircle2 className="h-5 w-5" />
+        <span className="hidden text-sm font-medium md:inline">Sign In</span>
+      </Button>
+    );
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="gap-2 h-9 px-2 md:px-3" aria-label="Menu profil pengguna">
           <Avatar className="h-7 w-7 shrink-0 ring-2 ring-field/20">
             <AvatarFallback className="bg-field text-xs font-bold text-field-foreground">
-              {user.initials}
+              {initials}
             </AvatarFallback>
           </Avatar>
           <div className="hidden min-w-0 flex-col items-start md:flex">
             <span className="w-full truncate text-sm font-medium leading-tight text-foreground">
-              {user.name}
+              {displayName}
             </span>
             <span className="w-full truncate text-[11px] leading-tight text-muted-foreground">
-              {user.role}
+              {role}
             </span>
           </div>
         </Button>
@@ -224,12 +317,12 @@ function ProfileMenu() {
           <div className="flex items-center gap-2.5">
             <Avatar className="h-9 w-9 ring-2 ring-field/20">
               <AvatarFallback className="bg-field text-xs font-bold text-field-foreground">
-                {user.initials}
+                {initials}
               </AvatarFallback>
             </Avatar>
             <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-foreground">{user.name}</p>
-              <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+              <p className="truncate text-sm font-medium text-foreground">{displayName}</p>
+              <p className="truncate text-xs text-muted-foreground">{email}</p>
             </div>
           </div>
         </DropdownMenuLabel>
@@ -245,9 +338,13 @@ function ProfileMenu() {
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem disabled className="gap-2.5 text-loss cursor-not-allowed">
+        <DropdownMenuItem
+          className="gap-2.5 text-loss cursor-pointer"
+          onClick={handleSignOut}
+          disabled={isSigningOut || isAuthLoading}
+        >
           <LogOut className="h-4 w-4" aria-hidden />
-          <span className="text-sm">Keluar (authentication belum aktif)</span>
+          <span className="text-sm">{isSigningOut ? "Signing out..." : "Keluar"}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -261,7 +358,6 @@ export function AppHeader({
   title: string;
   subtitle?: string;
 }) {
-  const [activeClub, setActiveClub] = useState<Club>(club);
   const [commandOpen, setCommandOpen] = useState(false);
   const breadcrumbs = useBreadcrumbs();
 
@@ -304,21 +400,12 @@ export function AppHeader({
         </div>
 
         <div className="hidden items-center gap-3 sm:flex">
-          <Badge
-            variant="outline"
-            className="gap-1.5 border-field/40 text-field md:hidden lg:inline-flex"
-          >
-            <span className="h-1.5 w-1.5 rounded-full bg-field" aria-hidden />
-            {activeClub.short} • {activeClub.city}
-          </Badge>
-          <span className="hidden text-sm font-medium text-muted-foreground md:inline">
-            Musim {activeClub.season}
-          </span>
+          {/* Season/Organization info can be added here when org data is available */}
         </div>
 
         <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
           <CommandPalette open={commandOpen} onOpenChange={setCommandOpen} />
-          <ClubSwitcher current={activeClub} onChange={setActiveClub} />
+          <ClubSwitcher />
           <NotificationBell />
           <ProfileMenu />
         </div>

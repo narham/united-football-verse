@@ -12,6 +12,8 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { RepositoriesProvider } from "@/lib/repositories-context";
+import { AuthProvider } from "@/lib/auth/auth-context";
+import { OrganizationProvider } from "@/lib/auth/organization-context";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { ErrorState } from "@/components/error-state";
@@ -106,14 +108,18 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <RepositoriesProvider clubId="club-default">
-        <SidebarProvider>
-          <div className="flex min-h-screen w-full bg-background">
-            <AppSidebar />
-            <SidebarInset className="flex flex-col">
-              <Outlet />
-            </SidebarInset>
-          </div>
-        </SidebarProvider>
+        <AuthProvider>
+          <OrganizationProvider>
+            <SidebarProvider>
+              <div className="flex min-h-screen w-full bg-background">
+                <AppSidebar />
+                <SidebarInset className="flex flex-col">
+                  <Outlet />
+                </SidebarInset>
+              </div>
+            </SidebarProvider>
+          </OrganizationProvider>
+        </AuthProvider>
       </RepositoriesProvider>
     </QueryClientProvider>
   );
