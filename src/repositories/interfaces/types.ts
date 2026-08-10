@@ -79,6 +79,7 @@ export interface Staff {
   name: string;
   role: StaffRole;
   telephone?: string;
+  email?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -109,6 +110,7 @@ export interface Season {
 export interface TrainingSession {
   id: string;
   clubId: string;
+  teamId?: string;
   title: string;
   day: string;
   startTime: string;
@@ -131,6 +133,7 @@ export interface Attendance {
 
 export interface Competition {
   id: string;
+  clubId: string;
   name: string;
   season: string;
   level: string;
@@ -205,11 +208,13 @@ export interface PlayerListParams extends ListParams {
 
 export interface StaffListParams extends ListParams {
   role?: StaffRole;
+  status?: string;
 }
 
 export interface TrainingListParams extends ListParams {
   teamId?: string;
   date?: string;
+  day?: string;
 }
 
 export interface MatchListParams extends ListParams {
@@ -223,6 +228,8 @@ export interface TransactionListParams extends ListParams {
   category?: TransactionCategory;
   dateFrom?: string;
   dateTo?: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 // ============================================================
@@ -248,18 +255,23 @@ export interface CreateStaffInput {
   name: string;
   role: StaffRole;
   telephone?: string;
+  email?: string;
 }
 
 export interface UpdateStaffInput extends Partial<CreateStaffInput> {}
 
 export interface CreateTeamInput {
   name: string;
-  ageGroup: string;
-  season: string;
+  category?: string;
+  ageGroup?: string;
+  seasonId?: string;
+  season?: string;
   coach?: string;
 }
 
-export interface UpdateTeamInput extends Partial<CreateTeamInput> {}
+export interface UpdateTeamInput extends Partial<CreateTeamInput> {
+  status?: "Aktif" | "Tidak Aktif" | "ACTIVE" | "INACTIVE" | "ARCHIVED";
+}
 
 export interface CreateSeasonInput {
   name: string;
@@ -278,6 +290,7 @@ export interface CreateTrainingInput {
   endTime: string;
   location: string;
   focus: string;
+  teamId?: string;
 }
 
 export interface UpdateTrainingInput extends Partial<CreateTrainingInput> {}
@@ -291,7 +304,8 @@ export interface RecordAttendanceInput {
 
 export interface CreateCompetitionInput {
   name: string;
-  season: string;
+  season?: string;
+  seasonId?: string;
   level: string;
 }
 
@@ -303,6 +317,9 @@ export interface CreateMatchInput {
   tanggal: string;
   venue: MatchVenue;
   competitionName: string;
+  teamId?: string;
+  skorHome?: number | null;
+  skorAway?: number | null;
 }
 
 export interface UpdateMatchInput {
@@ -311,6 +328,7 @@ export interface UpdateMatchInput {
   venue?: MatchVenue;
   skorHome?: number | null;
   skorAway?: number | null;
+  status?: "SCHEDULED" | "COMPLETED" | "CANCELLED" | "ARCHIVED";
 }
 
 export interface CreateTransactionInput {

@@ -30,7 +30,7 @@ export class SupabasePlayerRepository implements PlayerRepository {
     let query = this.supabase
       .from("players")
       .select("*", { count: "exact" })
-      .eq("club_id", this.clubId);
+      .eq("organization_id", this.clubId);
 
     // Apply search
     if (params?.search) {
@@ -102,7 +102,7 @@ export class SupabasePlayerRepository implements PlayerRepository {
 
     const playerData: any = {
       id,
-      club_id: this.clubId,
+      organization_id: this.clubId,
       football_id: footballId,
       nama: input.name,
       posisi: input.posisi,
@@ -261,11 +261,13 @@ export class SupabasePlayerRepository implements PlayerRepository {
     return data ? this.mapFromDatabase(data) : null;
   }
 
+  // TODO(R-REG): Signature mismatch with interface PlayerRepository.getStats(playerId: string, season: string) — missing playerId and season params
   async getStats(): Promise<any> {
     // TODO: Implement stats retrieval
     return {};
   }
 
+  // TODO(R-REG): Signature mismatch with interface PlayerRepository.getPerformanceRating(playerId: string, season?: string): Promise<PlayerPerformanceRating> — missing params, return type is `any` not PlayerPerformanceRating
   async getPerformanceRating(): Promise<any> {
     // TODO: Implement performance rating calculation
     return { label: "N/A", score: 0, grade: "-" };
@@ -291,7 +293,7 @@ export class SupabasePlayerRepository implements PlayerRepository {
     const stats = data.stats || [];
     const player: any = {
       id: data.id,
-      clubId: data.club_id,
+      clubId: data.organization_id,
       football_id: data.football_id,
       name: data.nama,
       posisi: data.posisi,

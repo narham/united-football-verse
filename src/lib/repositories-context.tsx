@@ -12,6 +12,7 @@ import type { Repositories } from "@/repositories/interfaces";
 import { createDemoRepositories } from "@/repositories/demo";
 import { createSupabaseRepositories } from "@/repositories/supabase";
 import { tryGetSupabaseClient } from "./supabase/client";
+import { DEFAULT_CLUB_ID } from "@/lib/demo-data";
 
 // Create context
 const RepositoriesContext = createContext<Repositories | null>(null);
@@ -31,7 +32,7 @@ interface RepositoriesProviderProps {
  */
 export function RepositoriesProvider({
   children,
-  clubId = "club-default",
+  clubId = DEFAULT_CLUB_ID,
   forceDemo = false,
 }: RepositoriesProviderProps) {
   // Determine which repositories to use

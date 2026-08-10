@@ -7,7 +7,7 @@ import { club, clubs } from "@/lib/demo-data";
 import { DemoStorage } from "./storage";
 
 export class DemoOrganizationRepository implements OrganizationRepository {
-  constructor(private storage: DemoStorage) {
+  constructor(private storage: DemoStorage, private clubId: string) {
     if (!this.storage.has("clubs")) {
       this.storage.set("clubs", clubs);
     }

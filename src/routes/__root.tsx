@@ -17,6 +17,7 @@ import { OrganizationProvider } from "@/lib/auth/organization-context";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { ErrorState } from "@/components/error-state";
+import { DEFAULT_CLUB_ID } from "@/lib/demo-data";
 
 function NotFoundComponent() {
   return (
@@ -107,7 +108,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <RepositoriesProvider clubId="club-default">
+      <RepositoriesProvider clubId={DEFAULT_CLUB_ID}>
         <AuthProvider>
           <OrganizationProvider>
             <SidebarProvider>

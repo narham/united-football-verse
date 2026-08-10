@@ -6,6 +6,7 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { safeError } from "@/lib/security/pii";
 import type {
   Match,
   MatchListParams,
@@ -68,7 +69,7 @@ export class SupabaseMatchRepository implements MatchRepository {
         hasMore: offset + limit < total,
       };
     } catch (error) {
-      console.error("Failed to list matches:", error);
+      safeError("Failed to list matches:", error);
       throw error;
     }
   }
@@ -94,7 +95,7 @@ export class SupabaseMatchRepository implements MatchRepository {
 
       return data ? this.mapFromDatabase(data) : null;
     } catch (error) {
-      console.error("Failed to fetch match:", error);
+      safeError("Failed to fetch match:", error);
       throw error;
     }
   }
@@ -132,7 +133,7 @@ export class SupabaseMatchRepository implements MatchRepository {
 
       return this.mapFromDatabase(data);
     } catch (error) {
-      console.error("Failed to create match:", error);
+      safeError("Failed to create match:", error);
       throw error;
     }
   }
@@ -146,15 +147,22 @@ export class SupabaseMatchRepository implements MatchRepository {
         updated_at: new Date().toISOString(),
       };
 
-      if (input.lawan !== undefined) payload.opponent_name = input.lawan;
-      if (input.tanggal !== undefined) payload.match_date = input.tanggal;
-      if (input.skorHome !== undefined) payload.score_home = input.skorHome;
-      if (input.skorAway !== undefined) payload.score_away = input.skorAway;
-      if (input.venue !== undefined) payload.venue = this.mapVenueToDatabase(input.venue);
+      if (input.lawan !== undefined) payload['opponent_name'] = input.lawan;
+      if (input.tanggal !== undefined) payload['match_date'] = input.tanggal;
+      if (input.skorHome !== undefined) payload['score_home'] = input.skorHome;
+      if (input.skorAway !== undefined) payload['score_away'] = input.skorAway;
+      if (input.venue !== undefined) payload['venue'] = this.mapVenueToDatabase(input.venue);
 
-      // Update status if scores are set
-      if (input.skorHome !== null && input.skorAway !== null) {
-        payload.status = "COMPLETED";
+      // Update status if scores are explicitly set.
+      // `!= null` catches both undefined and null — required for exactOptionalPropertyTypes.
+      const hasScores = input.skorHome != null && input.skorAway != null;
+      if (hasScores) {
+        payload['status'] = "COMPLETED";
+      } else if (input.skorHome === null && input.skorAway === null) {
+        // Explicitly cleared scores → revert to SCHEDULED (if not CANCELLED/ARCHIVED)
+        if (payload['status'] === undefined) {
+          payload['status'] = "SCHEDULED";
+        }
       }
 
       const { data, error } = await this.supabase
@@ -175,7 +183,7 @@ export class SupabaseMatchRepository implements MatchRepository {
 
       return this.mapFromDatabase(data);
     } catch (error) {
-      console.error("Failed to update match:", error);
+      safeError("Failed to update match:", error);
       throw error;
     }
   }
@@ -198,7 +206,7 @@ export class SupabaseMatchRepository implements MatchRepository {
         throw error;
       }
     } catch (error) {
-      console.error("Failed to delete match:", error);
+      safeError("Failed to delete match:", error);
       throw error;
     }
   }
@@ -224,7 +232,7 @@ export class SupabaseMatchRepository implements MatchRepository {
       if (homeForUs === awayForUs) return "draw";
       return homeForUs > awayForUs ? "win" : "loss";
     } catch (error) {
-      console.error("Failed to get match result:", error);
+      safeError("Failed to get match result:", error);
       throw error;
     }
   }
@@ -247,11 +255,11 @@ export class SupabaseMatchRepository implements MatchRepository {
       let w = 0, d = 0, l = 0, gf = 0, ga = 0;
 
       for (const match of data || []) {
-        if (match.score_home === null || match.score_away === null) continue;
+        if (match['score_home'] === null || match['score_away'] === null) continue;
 
-        const isHome = match.venue === "HOME" || match.venue === "NEUTRAL";
-        const ourGoals = isHome ? match.score_home : match.score_away;
-        const theirGoals = isHome ? match.score_away : match.score_home;
+        const isHome = match['venue'] === "HOME" || match['venue'] === "NEUTRAL";
+        const ourGoals = isHome ? match['score_home'] : match['score_away'];
+        const theirGoals = isHome ? match['score_away'] : match['score_home'];
 
         gf += ourGoals;
         ga += theirGoals;
@@ -263,7 +271,7 @@ export class SupabaseMatchRepository implements MatchRepository {
 
       return { w, d, l, gf, ga };
     } catch (error) {
-      console.error("Failed to get record stats:", error);
+      safeError("Failed to get record stats:", error);
       throw error;
     }
   }
@@ -287,7 +295,7 @@ export class SupabaseMatchRepository implements MatchRepository {
 
       return (data || []).map((m) => this.mapFromDatabase(m));
     } catch (error) {
-      console.error("Failed to get upcoming matches:", error);
+      safeError("Failed to get upcoming matches:", error);
       throw error;
     }
   }
@@ -310,7 +318,7 @@ export class SupabaseMatchRepository implements MatchRepository {
 
       return (data || []).map((m) => this.mapFromDatabase(m));
     } catch (error) {
-      console.error("Failed to get past matches:", error);
+      safeError("Failed to get past matches:", error);
       throw error;
     }
   }
@@ -347,17 +355,17 @@ export class SupabaseMatchRepository implements MatchRepository {
    */
   private mapFromDatabase(row: any): Match {
     return {
-      id: row.id,
+      id: row['id'],
       clubId: this.organizationId,
-      competitionId: row.competition_id,
+      competitionId: row['competition_id'],
       competitionName: "", // TODO: Join with competitions table
-      lawan: row.opponent_name,
-      tanggal: row.match_date,
-      skorHome: row.score_home,
-      skorAway: row.score_away,
-      venue: this.mapVenueFromDatabase(row.venue),
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
+      lawan: row['opponent_name'],
+      tanggal: row['match_date'],
+      skorHome: row['score_home'],
+      skorAway: row['score_away'],
+      venue: this.mapVenueFromDatabase(row['venue']),
+      createdAt: row['created_at'],
+      updatedAt: row['updated_at'],
     };
   }
 }

@@ -7,7 +7,7 @@ import { transactions as initialTransactions } from "@/lib/demo-data";
 import { DemoStorage } from "./storage";
 
 export class DemoFinanceRepository implements FinanceRepository {
-  constructor(private storage: DemoStorage) {
+  constructor(private storage: DemoStorage, private clubId: string) {
     if (!this.storage.has("transactions")) {
       this.storage.set("transactions", initialTransactions);
     }
@@ -45,7 +45,7 @@ export class DemoFinanceRepository implements FinanceRepository {
 
   async getById(id: string): Promise<Transaction | null> {
     return this.storage.get<Transaction[]>("transactions", undefined, [])
-      .find((t) => t.id === id) || null;
+      .find((t) => t.id === id && t.clubId === this.clubId) || null;
   }
 
   async create(clubId: string, input: CreateTransactionInput): Promise<Transaction> {
@@ -64,7 +64,7 @@ export class DemoFinanceRepository implements FinanceRepository {
 
   async update(id: string, input: UpdateTransactionInput): Promise<Transaction> {
     const allTransactions = this.storage.get<Transaction[]>("transactions", undefined, []);
-    const index = allTransactions.findIndex((t) => t.id === id);
+    const index = allTransactions.findIndex((t) => t.id === id && t.clubId === this.clubId);
     if (index === -1) throw new Error("Transaction not found");
     const old = allTransactions[index]!;
     const updated: Transaction = {
@@ -85,7 +85,7 @@ export class DemoFinanceRepository implements FinanceRepository {
 
   async delete(id: string): Promise<void> {
     const allTransactions = this.storage.get<Transaction[]>("transactions", undefined, []);
-    const index = allTransactions.findIndex((t) => t.id === id);
+    const index = allTransactions.findIndex((t) => t.id === id && t.clubId === this.clubId);
     if (index !== -1) {
       allTransactions.splice(index, 1);
       this.storage.set("transactions", allTransactions);

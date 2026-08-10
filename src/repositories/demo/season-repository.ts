@@ -11,7 +11,7 @@ const initialSeasons: Season[] = [
 ];
 
 export class DemoSeasonRepository implements SeasonRepository {
-  constructor(private storage: DemoStorage) {
+  constructor(private storage: DemoStorage, private clubId: string) {
     if (!this.storage.has("seasons")) {
       this.storage.set("seasons", initialSeasons);
     }
@@ -24,7 +24,7 @@ export class DemoSeasonRepository implements SeasonRepository {
 
   async getById(id: string): Promise<Season | null> {
     return this.storage.get<Season[]>("seasons", undefined, [])
-      .find((s) => s.id === id) || null;
+      .find((s) => s.id === id && s.clubId === this.clubId) || null;
   }
 
   async create(clubId: string, input: CreateSeasonInput): Promise<Season> {
@@ -44,7 +44,7 @@ export class DemoSeasonRepository implements SeasonRepository {
 
   async update(id: string, input: UpdateSeasonInput): Promise<Season> {
     const allSeasons = this.storage.get<Season[]>("seasons", undefined, []);
-    const index = allSeasons.findIndex((s) => s.id === id);
+    const index = allSeasons.findIndex((s) => s.id === id && s.clubId === this.clubId);
     if (index === -1) throw new Error("Season not found");
     const old = allSeasons[index]!;
     const updated: Season = {
@@ -64,7 +64,7 @@ export class DemoSeasonRepository implements SeasonRepository {
 
   async delete(id: string): Promise<void> {
     const allSeasons = this.storage.get<Season[]>("seasons", undefined, []);
-    const index = allSeasons.findIndex((s) => s.id === id);
+    const index = allSeasons.findIndex((s) => s.id === id && s.clubId === this.clubId);
     if (index !== -1) {
       allSeasons.splice(index, 1);
       this.storage.set("seasons", allSeasons);
@@ -78,10 +78,9 @@ export class DemoSeasonRepository implements SeasonRepository {
 
   async setActive(id: string): Promise<void> {
     const allSeasons = this.storage.get<Season[]>("seasons", undefined, []);
-    const season = allSeasons.find((s) => s.id === id);
+    const season = allSeasons.find((s) => s.id === id && s.clubId === this.clubId);
     if (!season) throw new Error("Season not found");
 
-    // Set all others to inactive
     for (const s of allSeasons) {
       if (s.clubId === season.clubId) {
         s.status = s.id === id ? "Aktif" : "Tidak Aktif";

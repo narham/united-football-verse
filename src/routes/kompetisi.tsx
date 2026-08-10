@@ -7,12 +7,15 @@ import { MatchResultCard } from "@/components/match-result-card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
-  matches,
-  matchRecord,
-  pastMatches,
-  upcomingMatches,
-  competitions,
-} from "@/lib/demo-data";
+  useMatches,
+  useMatchRecordStats,
+  usePastMatches,
+  useUpcomingMatches,
+} from "@/hooks/useMatches";
+import { useCompetitions } from "@/hooks/useCompetitions";
+import { useClub } from "@/hooks/useOrganization";
+import { useActiveSeason } from "@/hooks/useSeasons";
+import type { Match, Competition } from "@/repositories/interfaces/types";
 
 export const Route = createFileRoute("/kompetisi")({
   head: () => ({
@@ -35,10 +38,24 @@ export const Route = createFileRoute("/kompetisi")({
 });
 
 function KompetisiPage() {
-  const record = matchRecord();
-  const past = pastMatches();
-  const upcoming = upcomingMatches();
+  const recordQuery = useMatchRecordStats();
+  const pastQuery = usePastMatches();
+  const upcomingQuery = useUpcomingMatches();
+  const competitionsQuery = useCompetitions();
+  const matchesQuery = useMatches();
+  const clubQuery = useClub();
+  const activeSeasonQuery = useActiveSeason();
+
+  const record = recordQuery.data ?? { w: 0, d: 0, l: 0, gf: 0, ga: 0 };
+  const past = pastQuery.data ?? [];
+  const upcoming = upcomingQuery.data ?? [];
+  const competitions = competitionsQuery.data ?? [];
+  const matches = matchesQuery.data ?? [];
   const totalPlayed = past.length;
+
+  const club_season_fallback = (): string => {
+    return clubQuery.data?.season || activeSeasonQuery.data?.name || "2026/2027";
+  };
 
   return (
     <>
@@ -92,9 +109,9 @@ function KompetisiPage() {
             </h2>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {competitions.map((c) => {
-              const cMatches = matches.filter((m) => m.competitionId === c.id);
-              const cPast = cMatches.filter((m) => m.skorHome !== null);
+            {competitions.map((c: Competition) => {
+              const cMatches = matches.filter((m: Match) => m.competitionId === c.id);
+              const cPast = cMatches.filter((m: Match) => m.skorHome !== null);
               return (
                 <Link
                   key={c.id}
@@ -152,7 +169,7 @@ function KompetisiPage() {
               </div>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
-              {upcoming.map((m) => (
+              {upcoming.map((m: Match) => (
                 <Link key={m.id} to="/kompetisi/$id" params={{ id: m.id }}>
                   <MatchResultCard match={m} />
                 </Link>
@@ -175,7 +192,7 @@ function KompetisiPage() {
             </Button>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
-            {past.map((m) => (
+            {past.map((m: Match) => (
               <Link key={m.id} to="/kompetisi/$id" params={{ id: m.id }}>
                 <MatchResultCard match={m} />
               </Link>
@@ -190,9 +207,4 @@ function KompetisiPage() {
       </main>
     </>
   );
-}
-
-// Helper to avoid circular-ish import (season info for heading fallback)
-function club_season_fallback(): string {
-  return "2026/2027";
 }

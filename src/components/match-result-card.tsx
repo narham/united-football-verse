@@ -1,6 +1,8 @@
 import { Calendar, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { club, matchResult, type Match, type MatchResult as TResult } from "@/lib/demo-data";
+import { matchResult } from "@/lib/demo-data"; // Allowed: pure utility function
+import type { Match, MatchResult as TResult } from "@/repositories/interfaces/types";
+import { useClub } from "@/hooks/useOrganization";
 
 function resultBadgeClass(r: TResult): string {
   switch (r) {
@@ -29,12 +31,13 @@ function resultLabel(r: TResult): string {
 }
 
 export function MatchResultCard({ match }: { match: Match }) {
+  const { data: club } = useClub();
   const isHome = match.venue === "Kandang" || match.venue === "Netral";
   const r = matchResult(match);
   const kitaSkor = isHome ? match.skorHome : match.skorAway;
   const lawanSkor = isHome ? match.skorAway : match.skorHome;
   const lawanNama = match.lawan;
-  const kitaLabel = club.short;
+  const kitaLabel = club?.short ?? "KITA";
 
   const dateLabel = new Date(match.tanggal).toLocaleDateString("id-ID", {
     day: "numeric",

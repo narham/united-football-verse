@@ -6,6 +6,7 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { safeError } from "@/lib/security/pii";
 import type { Club, OrganizationRepository } from "@/repositories/interfaces";
 
 /**
@@ -35,7 +36,7 @@ export class SupabaseOrganizationRepository implements OrganizationRepository {
 
       return data ? this.mapFromDatabase(data) : null;
     } catch (error) {
-      console.error("Failed to fetch organization:", error);
+      safeError("Failed to fetch organization:", error);
       throw error;
     }
   }
@@ -48,13 +49,16 @@ export class SupabaseOrganizationRepository implements OrganizationRepository {
       // Prepare update payload (map from app format to database format)
       const payload: Record<string, any> = {};
       
-      if (clubUpdate.name !== undefined) payload.name = clubUpdate.name;
-      if (clubUpdate.short !== undefined) payload.short = clubUpdate.short;
-      if (clubUpdate.city !== undefined) payload.city = clubUpdate.city;
-      if (clubUpdate.foundedYear !== undefined) payload.founded_year = clubUpdate.foundedYear;
-      if (clubUpdate.logoUrl !== undefined) payload.logo_url = clubUpdate.logoUrl;
+      if (clubUpdate.name !== undefined) payload['name'] = clubUpdate.name;
+      if (clubUpdate.short !== undefined) payload['short'] = clubUpdate.short;
+      if (clubUpdate.city !== undefined) payload['city'] = clubUpdate.city;
+      if (clubUpdate.foundedYear !== undefined) payload['founded_year'] = clubUpdate.foundedYear;
+      if (clubUpdate.logoUrl !== undefined) payload['logo_url'] = clubUpdate.logoUrl;
+      if (clubUpdate.season !== undefined) payload['season'] = clubUpdate.season;
+      if (clubUpdate.sport !== undefined) payload['sport'] = clubUpdate.sport;
+      if (clubUpdate.footballOrgId !== undefined) payload['football_org_id'] = clubUpdate.footballOrgId;
       
-      payload.updated_at = new Date().toISOString();
+      payload['updated_at'] = new Date().toISOString();
 
       const { data, error } = await this.supabase
         .from("organizations")
@@ -73,7 +77,7 @@ export class SupabaseOrganizationRepository implements OrganizationRepository {
 
       return this.mapFromDatabase(data);
     } catch (error) {
-      console.error("Failed to update organization:", error);
+      safeError("Failed to update organization:", error);
       throw error;
     }
   }
@@ -96,7 +100,7 @@ export class SupabaseOrganizationRepository implements OrganizationRepository {
 
       return (data || []).map((org) => this.mapFromDatabase(org));
     } catch (error) {
-      console.error("Failed to fetch organizations:", error);
+      safeError("Failed to fetch organizations:", error);
       throw error;
     }
   }
@@ -106,14 +110,15 @@ export class SupabaseOrganizationRepository implements OrganizationRepository {
    */
   private mapFromDatabase(row: any): Club {
     return {
-      id: row.id,
-      name: row.name,
-      short: row.short || undefined,
-      city: row.city || undefined,
-      foundedYear: row.founded_year || undefined,
-      season: row.season || "2026/2027", // Default season
-      sport: row.sport || "Sepak Bola", // Default sport
-      logoUrl: row.logo_url || undefined,
+      id: row['id'],
+      name: row['name'],
+      short: row['short'] || undefined,
+      city: row['city'] || undefined,
+      foundedYear: row['founded_year'] || undefined,
+      season: row['season'] || "2026/2027",
+      sport: row['sport'] || "Sepak Bola",
+      logoUrl: row['logo_url'] || undefined,
+      footballOrgId: row['football_org_id'] || undefined,
     };
   }
 }

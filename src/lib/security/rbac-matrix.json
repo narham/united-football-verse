@@ -1,0 +1,138 @@
+{
+  "_meta": {
+    "version": "1.0",
+    "authoritative": true,
+    "note": "FINAL authoritative role permissions matrix. RLS policies in migrations enforce this. PLATFORM_ADMIN bypasses RLS via service_role. Per-entity CRUD: C=create, R=read, U=update, D=delete.",
+    "decision_FINANCE_staff": "FINANCE role is INTENTIONALLY EXCLUDED from staff INSERT/UPDATE/DELETE. Staff management = HR/ops function; FINANCE scope limited to financial transactions (per 011_create_transactions.sql). Preserves separation of duties."
+  },
+  "roles": {
+    "PLATFORM_ADMIN": {
+      "description": "Full platform access. Bypasses RLS via service_role key.",
+      "entities": {
+        "organization":     { "C": true,  "R": true,  "U": true,  "D": true  },
+        "season":           { "C": true,  "R": true,  "U": true,  "D": true  },
+        "team":             { "C": true,  "R": true,  "U": true,  "D": true  },
+        "player":           { "C": true,  "R": true,  "U": true,  "D": true  },
+        "staff":            { "C": true,  "R": true,  "U": true,  "D": true  },
+        "training":         { "C": true,  "R": true,  "U": true,  "D": true  },
+        "competition":      { "C": true,  "R": true,  "U": true,  "D": true  },
+        "match":            { "C": true,  "R": true,  "U": true,  "D": true  },
+        "transaction":      { "C": true,  "R": true,  "U": true,  "D": true  },
+        "membership":       { "C": true,  "R": true,  "U": true,  "D": true  },
+        "userProfile":      { "C": true,  "R": true,  "U": true,  "D": true  }
+      }
+    },
+    "ORG_OWNER": {
+      "description": "Organization owner. Full CRUD within own organization.",
+      "entities": {
+        "organization":     { "C": false, "R": true,  "U": true,  "D": true  },
+        "season":           { "C": true,  "R": true,  "U": true,  "D": true  },
+        "team":             { "C": true,  "R": true,  "U": true,  "D": true  },
+        "player":           { "C": true,  "R": true,  "U": true,  "D": true  },
+        "staff":            { "C": true,  "R": true,  "U": true,  "D": true  },
+        "training":         { "C": true,  "R": true,  "U": true,  "D": true  },
+        "competition":      { "C": true,  "R": true,  "U": true,  "D": true  },
+        "match":            { "C": true,  "R": true,  "U": true,  "D": true  },
+        "transaction":      { "C": true,  "R": true,  "U": true,  "D": true  },
+        "membership":       { "C": true,  "R": true,  "U": true,  "D": true  },
+        "userProfile":      { "C": false, "R": true,  "U": false, "D": false }
+      }
+    },
+    "ORG_ADMIN": {
+      "description": "Organization administrator. Almost full CRUD within org; D on transactions allowed same as ORG_OWNER.",
+      "entities": {
+        "organization":     { "C": false, "R": true,  "U": true,  "D": false },
+        "season":           { "C": true,  "R": true,  "U": true,  "D": true  },
+        "team":             { "C": true,  "R": true,  "U": true,  "D": true  },
+        "player":           { "C": true,  "R": true,  "U": true,  "D": true  },
+        "staff":            { "C": true,  "R": true,  "U": true,  "D": true  },
+        "training":         { "C": true,  "R": true,  "U": true,  "D": true  },
+        "competition":      { "C": true,  "R": true,  "U": true,  "D": true  },
+        "match":            { "C": true,  "R": true,  "U": true,  "D": true  },
+        "transaction":      { "C": true,  "R": true,  "U": true,  "D": true  },
+        "membership":       { "C": true,  "R": true,  "U": true,  "D": true  },
+        "userProfile":      { "C": false, "R": true,  "U": false, "D": false }
+      }
+    },
+    "MANAGER": {
+      "description": "Operations manager. Creates/updates seasons, teams, staff, players, training, competitions, matches, transactions. No DELETE on most entities (except soft-delete flows at repo layer).",
+      "entities": {
+        "organization":     { "C": false, "R": true,  "U": false, "D": false },
+        "season":           { "C": true,  "R": true,  "U": true,  "D": false },
+        "team":             { "C": true,  "R": true,  "U": true,  "D": false },
+        "player":           { "C": true,  "R": true,  "U": true,  "D": false },
+        "staff":            { "C": true,  "R": true,  "U": true,  "D": false },
+        "training":         { "C": true,  "R": true,  "U": true,  "D": false },
+        "competition":      { "C": true,  "R": true,  "U": true,  "D": false },
+        "match":            { "C": true,  "R": true,  "U": true,  "D": false },
+        "transaction":      { "C": true,  "R": true,  "U": true,  "D": false },
+        "membership":       { "C": false, "R": true,  "U": false, "D": false },
+        "userProfile":      { "C": false, "R": true,  "U": false, "D": false }
+      }
+    },
+    "COACH": {
+      "description": "Team coach. Manages players (C/U), training (C/U), competitions (C/U), matches (C/U). No staff/finance/season/team write access.",
+      "entities": {
+        "organization":     { "C": false, "R": true,  "U": false, "D": false },
+        "season":           { "C": false, "R": true,  "U": false, "D": false },
+        "team":             { "C": false, "R": true,  "U": false, "D": false },
+        "player":           { "C": true,  "R": true,  "U": true,  "D": false },
+        "staff":            { "C": false, "R": true,  "U": false, "D": false },
+        "training":         { "C": true,  "R": true,  "U": true,  "D": false },
+        "competition":      { "C": true,  "R": true,  "U": true,  "D": false },
+        "match":            { "C": true,  "R": true,  "U": true,  "D": false },
+        "transaction":      { "C": false, "R": true,  "U": false, "D": false },
+        "membership":       { "C": false, "R": true,  "U": false, "D": false },
+        "userProfile":      { "C": false, "R": true,  "U": false, "D": false }
+      }
+    },
+    "STAFF": {
+      "description": "General staff. Assists with players, training, and transactions. No staff mgmt, no seasons/teams/competition/match creation.",
+      "entities": {
+        "organization":     { "C": false, "R": true,  "U": false, "D": false },
+        "season":           { "C": false, "R": true,  "U": false, "D": false },
+        "team":             { "C": false, "R": true,  "U": false, "D": false },
+        "player":           { "C": true,  "R": true,  "U": true,  "D": false },
+        "staff":            { "C": false, "R": true,  "U": false, "D": false },
+        "training":         { "C": true,  "R": true,  "U": true,  "D": false },
+        "competition":      { "C": false, "R": true,  "U": false, "D": false },
+        "match":            { "C": false, "R": true,  "U": false, "D": false },
+        "transaction":      { "C": true,  "R": true,  "U": true,  "D": false },
+        "membership":       { "C": false, "R": true,  "U": false, "D": false },
+        "userProfile":      { "C": false, "R": true,  "U": false, "D": false }
+      }
+    },
+    "FINANCE": {
+      "description": "Finance operations. ONLY manages transactions (C/U/R). INTENTIONALLY EXCLUDED from staff create/update/delete — separation of duties (HR vs finance). Read-only on all other entities.",
+      "entities": {
+        "organization":     { "C": false, "R": true,  "U": false, "D": false },
+        "season":           { "C": false, "R": true,  "U": false, "D": false },
+        "team":             { "C": false, "R": true,  "U": false, "D": false },
+        "player":           { "C": false, "R": true,  "U": false, "D": false },
+        "staff":            { "C": false, "R": true,  "U": false, "D": false },
+        "training":         { "C": false, "R": true,  "U": false, "D": false },
+        "competition":      { "C": false, "R": true,  "U": false, "D": false },
+        "match":            { "C": false, "R": true,  "U": false, "D": false },
+        "transaction":      { "C": true,  "R": true,  "U": true,  "D": false },
+        "membership":       { "C": false, "R": true,  "U": false, "D": false },
+        "userProfile":      { "C": false, "R": true,  "U": false, "D": false }
+      }
+    },
+    "VIEWER": {
+      "description": "Read-only viewer. No write permissions on any entity.",
+      "entities": {
+        "organization":     { "C": false, "R": true,  "U": false, "D": false },
+        "season":           { "C": false, "R": true,  "U": false, "D": false },
+        "team":             { "C": false, "R": true,  "U": false, "D": false },
+        "player":           { "C": false, "R": true,  "U": false, "D": false },
+        "staff":            { "C": false, "R": true,  "U": false, "D": false },
+        "training":         { "C": false, "R": true,  "U": false, "D": false },
+        "competition":      { "C": false, "R": true,  "U": false, "D": false },
+        "match":            { "C": false, "R": true,  "U": false, "D": false },
+        "transaction":      { "C": false, "R": true,  "U": false, "D": false },
+        "membership":       { "C": false, "R": true,  "U": false, "D": false },
+        "userProfile":      { "C": false, "R": true,  "U": false, "D": false }
+      }
+    }
+  }
+}

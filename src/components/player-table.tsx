@@ -10,7 +10,9 @@ import {
 } from "@/components/ui/table";
 import { PositionBadge, StatusBadge } from "@/components/position-badge";
 import { DataState, DefaultEmptyState } from "@/components/data-state";
-import { players as allPlayers, usia, seasonStatsTotal, type Player } from "@/lib/demo-data";
+import { usia, seasonStatsTotal } from "@/lib/demo-data"; // Allowed: pure utility function
+import type { Player } from "@/repositories/interfaces/types";
+import { usePlayers } from "@/hooks/usePlayers";
 import { cn } from "@/lib/utils";
 
 // =========================
@@ -113,7 +115,8 @@ export function PlayerTable({
   status?: "loading" | "empty" | "error" | "success";
   emptyMessage?: string;
 }) {
-  const source = data ?? allPlayers;
+  const { data: hookPlayers } = usePlayers();
+  const source = data ?? hookPlayers ?? [];
 
   return (
     <DataState

@@ -4,7 +4,7 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRepositories } from "./useRepositories";
+import { useRepositories, useCurrentOrganizationId } from "./useRepositories";
 import type {
   Staff,
   StaffListParams,
@@ -15,18 +15,19 @@ import type {
 const staffKeys = {
   all: () => ["staff"],
   lists: () => [...staffKeys.all(), "list"],
-  list: (params?: StaffListParams) => [...staffKeys.lists(), params ?? "default"],
+  list: (clubId: string, params?: StaffListParams) => [...staffKeys.lists(), clubId, params ?? "default"],
   details: () => [...staffKeys.all(), "detail"],
   detail: (id: string) => [...staffKeys.details(), id],
 };
 
 export function useStaff(params?: StaffListParams) {
   const repositories = useRepositories();
+  const clubId = useCurrentOrganizationId();
 
   return useQuery({
-    queryKey: staffKeys.list(params),
+    queryKey: staffKeys.list(clubId, params),
     queryFn: async () => {
-      const result = await repositories.staff.list("club-default", params);
+      const result = await repositories.staff.list(clubId, params);
       return result.data || [];
     },
   });
@@ -47,11 +48,12 @@ export function useStaffMember(id: string | undefined) {
 
 export function useCreateStaff() {
   const repositories = useRepositories();
+  const clubId = useCurrentOrganizationId();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (input: CreateStaffInput) => {
-      return repositories.staff.create("club-default", input);
+      return repositories.staff.create(clubId, input);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: staffKeys.all() });

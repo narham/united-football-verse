@@ -4,36 +4,38 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRepositories } from "./useRepositories";
+import { useRepositories, useCurrentOrganizationId } from "./useRepositories";
 import type { Season, CreateSeasonInput, UpdateSeasonInput } from "@/repositories/interfaces";
 
 const seasonKeys = {
   all: () => ["seasons"],
   lists: () => [...seasonKeys.all(), "list"],
-  list: () => [...seasonKeys.lists()],
+  list: (clubId: string) => [...seasonKeys.lists(), clubId],
   details: () => [...seasonKeys.all(), "detail"],
   detail: (id: string) => [...seasonKeys.details(), id],
-  active: () => [...seasonKeys.all(), "active"],
+  active: (clubId: string) => [...seasonKeys.all(), "active", clubId],
 };
 
 export function useSeasons() {
   const repositories = useRepositories();
+  const clubId = useCurrentOrganizationId();
 
   return useQuery({
-    queryKey: seasonKeys.list(),
+    queryKey: seasonKeys.list(clubId),
     queryFn: async () => {
-      return repositories.season.list("club-default");
+      return repositories.season.list(clubId);
     },
   });
 }
 
 export function useActiveSeason() {
   const repositories = useRepositories();
+  const clubId = useCurrentOrganizationId();
 
   return useQuery({
-    queryKey: seasonKeys.active(),
+    queryKey: seasonKeys.active(clubId),
     queryFn: async () => {
-      return repositories.season.getActive("club-default");
+      return repositories.season.getActive(clubId);
     },
   });
 }
@@ -53,11 +55,12 @@ export function useSeason(id: string | undefined) {
 
 export function useCreateSeason() {
   const repositories = useRepositories();
+  const clubId = useCurrentOrganizationId();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (input: CreateSeasonInput) => {
-      return repositories.season.create("club-default", input);
+      return repositories.season.create(clubId, input);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: seasonKeys.all() });
@@ -110,7 +113,6 @@ export function useSetActiveSeason() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: seasonKeys.all() });
-      queryClient.invalidateQueries({ queryKey: seasonKeys.active() });
     },
   });
 }

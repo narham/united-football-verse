@@ -1,3 +1,4 @@
+-- RBAC DECISION: FINANCE role is INTENTIONALLY EXCLUDED from staff INSERT/UPDATE/DELETE (staff mgmt = HR/ops, not finance — separation of duties; see rbac-matrix.json)
 -- Migration: Create staff table
 -- Purpose: Store coaching and administrative staff members
 -- PHASE 6 STEP 5.5

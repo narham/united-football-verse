@@ -7,7 +7,12 @@ import { staff as initialStaff } from "@/lib/demo-data";
 import { DemoStorage } from "./storage";
 
 export class DemoStaffRepository implements StaffRepository {
-  constructor(private storage: DemoStorage) {
+  private storage: DemoStorage;
+  private clubId: string;
+
+  constructor(storage: DemoStorage, clubId: string) {
+    this.storage = storage;
+    this.clubId = clubId;
     if (!this.storage.has("staff")) {
       this.storage.set("staff", initialStaff);
     }
@@ -41,7 +46,7 @@ export class DemoStaffRepository implements StaffRepository {
 
   async getById(id: string): Promise<Staff | null> {
     return this.storage.get<Staff[]>("staff", undefined, [])
-      .find((s) => s.id === id) || null;
+      .find((s) => s.id === id && s.clubId === this.clubId) || null;
   }
 
   async create(clubId: string, input: CreateStaffInput): Promise<Staff> {
@@ -60,16 +65,18 @@ export class DemoStaffRepository implements StaffRepository {
 
   async update(id: string, input: UpdateStaffInput): Promise<Staff> {
     const allStaff = this.storage.get<Staff[]>("staff", undefined, []);
-    const index = allStaff.findIndex((s) => s.id === id);
+    const index = allStaff.findIndex((s) => s.id === id && s.clubId === this.clubId);
     if (index === -1) throw new Error("Staff not found");
     const old = allStaff[index]!;
     const telephone = input.telephone !== undefined ? input.telephone : old.telephone;
+    const email = input.email !== undefined ? input.email : old.email;
     const updated: Staff = {
       id: old.id,
       clubId: old.clubId,
       name: input.name ?? old.name,
       role: input.role ?? old.role,
       ...(telephone !== undefined && { telephone }),
+      ...(email !== undefined && { email }),
       createdAt: old.createdAt ?? new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -80,7 +87,7 @@ export class DemoStaffRepository implements StaffRepository {
 
   async delete(id: string): Promise<void> {
     const allStaff = this.storage.get<Staff[]>("staff", undefined, []);
-    const index = allStaff.findIndex((s) => s.id === id);
+    const index = allStaff.findIndex((s) => s.id === id && s.clubId === this.clubId);
     if (index !== -1) {
       allStaff.splice(index, 1);
       this.storage.set("staff", allStaff);

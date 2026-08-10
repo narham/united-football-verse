@@ -4,7 +4,7 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRepositories } from "./useRepositories";
+import { useRepositories, useCurrentOrganizationId } from "./useRepositories";
 import type {
   TrainingSession,
   TrainingListParams,
@@ -17,7 +17,7 @@ import type {
 const trainingKeys = {
   all: () => ["training"],
   lists: () => [...trainingKeys.all(), "list"],
-  list: (params?: TrainingListParams) => [...trainingKeys.lists(), params ?? "default"],
+  list: (clubId: string, params?: TrainingListParams) => [...trainingKeys.lists(), clubId, params ?? "default"],
   details: () => [...trainingKeys.all(), "detail"],
   detail: (id: string) => [...trainingKeys.details(), id],
   attendance: () => [...trainingKeys.all(), "attendance"],
@@ -26,11 +26,12 @@ const trainingKeys = {
 
 export function useTrainingSessions(params?: TrainingListParams) {
   const repositories = useRepositories();
+  const clubId = useCurrentOrganizationId();
 
   return useQuery({
-    queryKey: trainingKeys.list(params),
+    queryKey: trainingKeys.list(clubId, params),
     queryFn: async () => {
-      const result = await repositories.training.list("club-default", params);
+      const result = await repositories.training.list(clubId, params);
       return result.data || [];
     },
   });
@@ -64,11 +65,12 @@ export function useAttendance(trainingId: string | undefined) {
 
 export function useCreateTrainingSession() {
   const repositories = useRepositories();
+  const clubId = useCurrentOrganizationId();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (input: CreateTrainingInput) => {
-      return repositories.training.create("club-default", input);
+      return repositories.training.create(clubId, input);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: trainingKeys.all() });

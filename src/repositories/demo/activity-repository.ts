@@ -6,7 +6,7 @@ import type { ActivityRepository } from "@/repositories/interfaces";
 import { DemoStorage } from "./storage";
 
 export class DemoActivityRepository implements ActivityRepository {
-  constructor(private storage: DemoStorage) {
+  constructor(private storage: DemoStorage, private clubId: string) {
     if (!this.storage.has("activities")) {
       this.storage.set("activities", []);
     }

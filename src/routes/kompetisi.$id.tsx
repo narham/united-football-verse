@@ -1,37 +1,60 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, ChevronRight, CalendarDays, Flag, Shield, Sparkles } from "lucide-react";
 
 import { AppHeader } from "@/components/app-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { matchById, matchResult, type Match } from "@/lib/demo-data";
+import { useMatch, useMatchResult } from "@/hooks/useMatches";
+import type { Match, MatchResult as MatchResultType } from "@/repositories/interfaces/types";
 
 export const Route = createFileRoute("/kompetisi/$id")({
-  loader: ({ params }) => {
-    const match = matchById(params.id);
-    if (!match) throw notFound();
-    return { match };
-  },
-  head: ({ loaderData }) => ({
+  head: ({ params }) => ({
     meta: [
-      { title: `${loaderData?.match.lawan} — bolaID Football OS` },
-      { name: "description", content: `Detail pertandingan ${loaderData?.match.lawan} dan susunan event demo.` },
-      { property: "og:title", content: `${loaderData?.match.lawan} — bolaID Football OS` },
+      { title: `Pertandingan ${params.id} — bolaID Football OS` },
+      { name: "description", content: `Detail pertandingan dan susunan event demo.` },
+      { property: "og:title", content: `Pertandingan ${params.id} — bolaID Football OS` },
     ],
   }),
   component: MatchDetailPage,
 });
 
 function MatchDetailPage() {
-  const { match } = Route.useLoaderData();
-  const result = matchResult(match);
+  const params = Route.useParams();
+  const matchQuery = useMatch(params.id);
+  const resultQuery = useMatchResult(matchQuery.data?.id);
+  const match = matchQuery.data;
+  const result = resultQuery.data ?? "upcoming";
+
   const badgeClass = {
     win: "border-win/30 bg-win/10 text-win",
     draw: "border-draw/30 bg-draw/10 text-draw",
     loss: "border-loss/30 bg-loss/10 text-loss",
     upcoming: "border-energetic/30 bg-energetic/10 text-energetic-foreground",
   }[result];
+
+  if (!match) {
+    return (
+      <>
+        <AppHeader title="Detail Pertandingan" subtitle="Memuat..." />
+        <main className="flex-1 space-y-4 p-4 md:p-6">
+          <nav className="flex items-center gap-1.5 text-sm text-muted-foreground">
+            <Link to="/kompetisi" className="hover:text-field">Kompetisi</Link>
+            <ChevronRight className="h-4 w-4" />
+            <span className="text-foreground">Memuat...</span>
+          </nav>
+          <Button asChild variant="outline" size="sm" className="gap-1.5">
+            <Link to="/kompetisi"><ArrowLeft className="h-4 w-4" /> Kembali ke kompetisi</Link>
+          </Button>
+          <Card className="border-border">
+            <CardContent className="p-5">
+              <p className="text-muted-foreground">Memuat data pertandingan...</p>
+            </CardContent>
+          </Card>
+        </main>
+      </>
+    );
+  }
 
   return (
     <>

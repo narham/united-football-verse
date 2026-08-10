@@ -1,3 +1,4 @@
+// RBAC DECISION: FINANCE role is INTENTIONALLY EXCLUDED from staff create/update/delete (HR/ops not finance; RLS in 008_create_staff.sql enforces ORG_OWNER/ORG_ADMIN/MANAGER only — see rbac-matrix.json)
 /**
  * Supabase Staff Repository
  * 
@@ -6,6 +7,7 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { safeError } from "@/lib/security/pii";
 import type {
   Staff,
   StaffListParams,
@@ -13,6 +15,7 @@ import type {
   UpdateStaffInput,
   ListResult,
   StaffRepository,
+  StaffRole,
 } from "@/repositories/interfaces";
 
 /**
@@ -71,7 +74,7 @@ export class SupabaseStaffRepository implements StaffRepository {
         hasMore: offset + limit < total,
       };
     } catch (error) {
-      console.error("Failed to list staff:", error);
+      safeError("Failed to list staff:", error);
       throw error;
     }
   }
@@ -97,7 +100,7 @@ export class SupabaseStaffRepository implements StaffRepository {
 
       return data ? this.mapFromDatabase(data) : null;
     } catch (error) {
-      console.error("Failed to fetch staff:", error);
+      safeError("Failed to fetch staff:", error);
       throw error;
     }
   }
@@ -132,7 +135,7 @@ export class SupabaseStaffRepository implements StaffRepository {
 
       return this.mapFromDatabase(data);
     } catch (error) {
-      console.error("Failed to create staff:", error);
+      safeError("Failed to create staff:", error);
       throw error;
     }
   }
@@ -146,10 +149,10 @@ export class SupabaseStaffRepository implements StaffRepository {
         updated_at: new Date().toISOString(),
       };
 
-      if (input.name !== undefined) payload.name = input.name;
-      if (input.role !== undefined) payload.role = this.mapRoleToDatabase(input.role);
-      if (input.telephone !== undefined) payload.telephone = input.telephone;
-      if (input.email !== undefined) payload.email = input.email;
+      if (input.name !== undefined) payload['name'] = input.name;
+      if (input.role !== undefined) payload['role'] = this.mapRoleToDatabase(input.role);
+      if (input.telephone !== undefined) payload['telephone'] = input.telephone;
+      if (input.email !== undefined) payload['email'] = input.email;
 
       const { data, error } = await this.supabase
         .from("staff")
@@ -169,7 +172,7 @@ export class SupabaseStaffRepository implements StaffRepository {
 
       return this.mapFromDatabase(data);
     } catch (error) {
-      console.error("Failed to update staff:", error);
+      safeError("Failed to update staff:", error);
       throw error;
     }
   }
@@ -192,7 +195,7 @@ export class SupabaseStaffRepository implements StaffRepository {
         throw error;
       }
     } catch (error) {
-      console.error("Failed to delete staff:", error);
+      safeError("Failed to delete staff:", error);
       throw error;
     }
   }
@@ -220,8 +223,8 @@ export class SupabaseStaffRepository implements StaffRepository {
   /**
    * Map staff role from database format to app format
    */
-  private mapRoleFromDatabase(role: string): string {
-    const roleMap: Record<string, string> = {
+  private mapRoleFromDatabase(role: string): StaffRole {
+    const roleMap: Record<string, StaffRole> = {
       "HEAD_COACH": "Kepala Pelatih",
       "ASSISTANT_COACH": "Asisten Pelatih",
       "GK_COACH": "Pelatih Kiper",
@@ -229,7 +232,7 @@ export class SupabaseStaffRepository implements StaffRepository {
       "MANAGER": "Manager",
       "OPERATOR": "Operator",
     };
-    return roleMap[role] || role;
+    return roleMap[role] || ("Manager" as StaffRole);
   }
 
   /**
@@ -237,13 +240,14 @@ export class SupabaseStaffRepository implements StaffRepository {
    */
   private mapFromDatabase(row: any): Staff {
     return {
-      id: row.id,
+      id: row['id'],
       clubId: this.organizationId,
-      name: row.name,
-      role: this.mapRoleFromDatabase(row.role),
-      telephone: row.telephone || undefined,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
+      name: row['name'],
+      role: this.mapRoleFromDatabase(row['role']),
+      telephone: row['telephone'] || undefined,
+      email: row['email'] || undefined,
+      createdAt: row['created_at'],
+      updatedAt: row['updated_at'],
     };
   }
 }

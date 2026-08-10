@@ -7,7 +7,7 @@ import { matches as initialMatches, matchResult } from "@/lib/demo-data";
 import { DemoStorage } from "./storage";
 
 export class DemoMatchRepository implements MatchRepository {
-  constructor(private storage: DemoStorage) {
+  constructor(private storage: DemoStorage, private clubId: string) {
     if (!this.storage.has("matches")) {
       this.storage.set("matches", initialMatches);
     }
@@ -39,7 +39,7 @@ export class DemoMatchRepository implements MatchRepository {
 
   async getById(id: string): Promise<Match | null> {
     return this.storage.get<Match[]>("matches", undefined, [])
-      .find((m) => m.id === id) || null;
+      .find((m) => m.id === id && m.clubId === this.clubId) || null;
   }
 
   async create(clubId: string, input: CreateMatchInput): Promise<Match> {
@@ -48,8 +48,8 @@ export class DemoMatchRepository implements MatchRepository {
       id: `m${Date.now()}`,
       clubId,
       ...input,
-      skorHome: null,
-      skorAway: null,
+      skorHome: input.skorHome !== undefined ? input.skorHome : null,
+      skorAway: input.skorAway !== undefined ? input.skorAway : null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -60,7 +60,7 @@ export class DemoMatchRepository implements MatchRepository {
 
   async update(id: string, input: UpdateMatchInput): Promise<Match> {
     const allMatches = this.storage.get<Match[]>("matches", undefined, []);
-    const index = allMatches.findIndex((m) => m.id === id);
+    const index = allMatches.findIndex((m) => m.id === id && m.clubId === this.clubId);
     if (index === -1) throw new Error("Match not found");
     const old = allMatches[index]!;
     const updated: Match = {
@@ -83,7 +83,7 @@ export class DemoMatchRepository implements MatchRepository {
 
   async delete(id: string): Promise<void> {
     const allMatches = this.storage.get<Match[]>("matches", undefined, []);
-    const index = allMatches.findIndex((m) => m.id === id);
+    const index = allMatches.findIndex((m) => m.id === id && m.clubId === this.clubId);
     if (index !== -1) {
       allMatches.splice(index, 1);
       this.storage.set("matches", allMatches);

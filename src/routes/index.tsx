@@ -17,18 +17,16 @@ import { MatchResultCard } from "@/components/match-result-card";
 import { PositionBadge } from "@/components/position-badge";
 import { FinanceSummary } from "@/components/finance-summary";
 import { Badge } from "@/components/ui/badge";
+import { formatRupiah, usia, seasonStatsTotal } from "@/lib/demo-data";
+import { useClub } from "@/hooks/useOrganization";
+import { usePlayers } from "@/hooks/usePlayers";
 import {
-  club,
-  players,
-  matchRecord,
-  financeTotals,
-  formatRupiah,
-  usia,
-  seasonStatsTotal,
-  pastMatches,
-  upcomingMatches,
-  competitions,
-} from "@/lib/demo-data";
+  useMatchRecordStats,
+  usePastMatches,
+  useUpcomingMatches,
+} from "@/hooks/useMatches";
+import { useFinanceTotals } from "@/hooks/useFinance";
+import { useCompetitions } from "@/hooks/useCompetitions";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -51,14 +49,24 @@ export const Route = createFileRoute("/")({
 });
 
 function DashboardPage() {
+  const club = useClub().data;
+  const players = usePlayers().data ?? [];
+  const record = useMatchRecordStats().data ?? { w: 0, d: 0, l: 0, gf: 0, ga: 0 };
+  const finance = useFinanceTotals().data ?? { masuk: 0, keluar: 0, saldo: 0 };
+  const pastMatchesData = usePastMatches().data ?? [];
+  const upcomingMatchesData = useUpcomingMatches().data ?? [];
+  const competitions = useCompetitions().data ?? [];
+
+  if (!club) {
+    return <div>Loading...</div>;
+  }
+
   const aktifCount = players.filter((p) => p.status === "Aktif").length;
-  const record = matchRecord();
-  const finance = financeTotals();
   const rosterSnapshot = [...players]
     .sort((a, b) => seasonStatsTotal(b).goals - seasonStatsTotal(a).goals)
     .slice(0, 4);
-  const latestMatches = pastMatches().slice(0, 3);
-  const upcoming = upcomingMatches().slice(0, 2);
+  const latestMatches = pastMatchesData.slice(0, 3);
+  const upcoming = upcomingMatchesData.slice(0, 2);
 
   return (
     <>

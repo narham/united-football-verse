@@ -42,7 +42,7 @@ export function createSupabaseRepositories(
 
   // Supabase implementations (PHASE 6 STEP 4 + STEP 5)
   const identityDocumentRepository = new SupabaseIdentityDocumentRepository(supabase);
-  const playerRepository = new SupabasePlayerRepository(supabase, clubId);
+  const playerRepository = new SupabasePlayerRepository(supabase, orgId);
   const authRepository = createSupabaseAuthRepository(supabase);
   const userProfileRepository = createSupabaseUserProfileRepository(supabase);
   const membershipRepository = createSupabaseMembershipRepository(supabase);

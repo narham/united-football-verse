@@ -6,6 +6,7 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { safeError } from "@/lib/security/pii";
 import type {
   Transaction,
   TransactionListParams,
@@ -77,7 +78,7 @@ export class SupabaseFinanceRepository implements FinanceRepository {
         hasMore: offset + limit < total,
       };
     } catch (error) {
-      console.error("Failed to list transactions:", error);
+      safeError("Failed to list transactions:", error);
       throw error;
     }
   }
@@ -103,7 +104,7 @@ export class SupabaseFinanceRepository implements FinanceRepository {
 
       return data ? this.mapFromDatabase(data) : null;
     } catch (error) {
-      console.error("Failed to fetch transaction:", error);
+      safeError("Failed to fetch transaction:", error);
       throw error;
     }
   }
@@ -138,7 +139,7 @@ export class SupabaseFinanceRepository implements FinanceRepository {
 
       return this.mapFromDatabase(data);
     } catch (error) {
-      console.error("Failed to create transaction:", error);
+      safeError("Failed to create transaction:", error);
       throw error;
     }
   }
@@ -152,11 +153,11 @@ export class SupabaseFinanceRepository implements FinanceRepository {
         updated_at: new Date().toISOString(),
       };
 
-      if (input.tanggal !== undefined) payload.date = input.tanggal;
-      if (input.tipe !== undefined) payload.type = this.mapTypeToDatabase(input.tipe);
-      if (input.jumlah !== undefined) payload.amount = Math.abs(input.jumlah);
-      if (input.kategori !== undefined) payload.category = this.mapCategoryToDatabase(input.kategori);
-      if (input.keterangan !== undefined) payload.description = input.keterangan;
+      if (input.tanggal !== undefined) payload['date'] = input.tanggal;
+      if (input.tipe !== undefined) payload['type'] = this.mapTypeToDatabase(input.tipe);
+      if (input.jumlah !== undefined) payload['amount'] = Math.abs(input.jumlah);
+      if (input.kategori !== undefined) payload['category'] = this.mapCategoryToDatabase(input.kategori);
+      if (input.keterangan !== undefined) payload['description'] = input.keterangan;
 
       const { data, error } = await this.supabase
         .from("transactions")
@@ -176,7 +177,7 @@ export class SupabaseFinanceRepository implements FinanceRepository {
 
       return this.mapFromDatabase(data);
     } catch (error) {
-      console.error("Failed to update transaction:", error);
+      safeError("Failed to update transaction:", error);
       throw error;
     }
   }
@@ -199,7 +200,7 @@ export class SupabaseFinanceRepository implements FinanceRepository {
         throw error;
       }
     } catch (error) {
-      console.error("Failed to delete transaction:", error);
+      safeError("Failed to delete transaction:", error);
       throw error;
     }
   }
@@ -235,7 +236,7 @@ export class SupabaseFinanceRepository implements FinanceRepository {
         saldo: masuk - keluar,
       };
     } catch (error) {
-      console.error("Failed to get totals:", error);
+      safeError("Failed to get totals:", error);
       throw error;
     }
   }
@@ -248,7 +249,7 @@ export class SupabaseFinanceRepository implements FinanceRepository {
       const totals = await this.getTotals(clubId);
       return totals.saldo;
     } catch (error) {
-      console.error("Failed to get balance:", error);
+      safeError("Failed to get balance:", error);
       throw error;
     }
   }
@@ -323,15 +324,15 @@ export class SupabaseFinanceRepository implements FinanceRepository {
    */
   private mapFromDatabase(row: any): Transaction {
     return {
-      id: row.id,
+      id: row['id'],
       clubId: this.organizationId,
-      tanggal: row.date,
-      tipe: this.mapTypeFromDatabase(row.type),
-      jumlah: row.amount,
-      kategori: this.mapCategoryFromDatabase(row.category),
-      keterangan: row.description || "",
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
+      tanggal: row['date'],
+      tipe: this.mapTypeFromDatabase(row['type']),
+      jumlah: row['amount'],
+      kategori: this.mapCategoryFromDatabase(row['category']),
+      keterangan: row['description'] || "",
+      createdAt: row['created_at'],
+      updatedAt: row['updated_at'],
     };
   }
 }

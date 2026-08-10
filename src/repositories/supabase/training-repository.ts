@@ -6,6 +6,7 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { safeError } from "@/lib/security/pii";
 import type {
   TrainingSession,
   TrainingListParams,
@@ -72,7 +73,7 @@ export class SupabaseTrainingRepository implements TrainingRepository {
         hasMore: offset + limit < total,
       };
     } catch (error) {
-      console.error("Failed to list training sessions:", error);
+      safeError("Failed to list training sessions:", error);
       throw error;
     }
   }
@@ -98,7 +99,7 @@ export class SupabaseTrainingRepository implements TrainingRepository {
 
       return data ? this.mapFromDatabase(data) : null;
     } catch (error) {
-      console.error("Failed to fetch training session:", error);
+      safeError("Failed to fetch training session:", error);
       throw error;
     }
   }
@@ -136,7 +137,7 @@ export class SupabaseTrainingRepository implements TrainingRepository {
 
       return this.mapFromDatabase(data);
     } catch (error) {
-      console.error("Failed to create training session:", error);
+      safeError("Failed to create training session:", error);
       throw error;
     }
   }
@@ -153,12 +154,13 @@ export class SupabaseTrainingRepository implements TrainingRepository {
         updated_at: new Date().toISOString(),
       };
 
-      if (input.title !== undefined) payload.title = input.title;
-      if (input.day !== undefined) payload.day_of_week = input.day;
-      if (input.startTime !== undefined) payload.start_time = input.startTime;
-      if (input.endTime !== undefined) payload.end_time = input.endTime;
-      if (input.location !== undefined) payload.location = input.location;
-      if (input.focus !== undefined) payload.focus = input.focus;
+      if (input.title !== undefined) payload['title'] = input.title;
+      if (input.day !== undefined) payload['day_of_week'] = input.day;
+      if (input.startTime !== undefined) payload['start_time'] = input.startTime;
+      if (input.endTime !== undefined) payload['end_time'] = input.endTime;
+      if (input.location !== undefined) payload['location'] = input.location;
+      if (input.focus !== undefined) payload['focus'] = input.focus;
+      if (input.teamId !== undefined) payload['team_id'] = input.teamId;
 
       const { data, error } = await this.supabase
         .from("training_sessions")
@@ -178,7 +180,7 @@ export class SupabaseTrainingRepository implements TrainingRepository {
 
       return this.mapFromDatabase(data);
     } catch (error) {
-      console.error("Failed to update training session:", error);
+      safeError("Failed to update training session:", error);
       throw error;
     }
   }
@@ -201,7 +203,7 @@ export class SupabaseTrainingRepository implements TrainingRepository {
         throw error;
       }
     } catch (error) {
-      console.error("Failed to delete training session:", error);
+      safeError("Failed to delete training session:", error);
       throw error;
     }
   }
@@ -236,7 +238,7 @@ export class SupabaseTrainingRepository implements TrainingRepository {
 
       return this.mapAttendanceFromDatabase(data);
     } catch (error) {
-      console.error("Failed to record attendance:", error);
+      safeError("Failed to record attendance:", error);
       throw error;
     }
   }
@@ -258,7 +260,7 @@ export class SupabaseTrainingRepository implements TrainingRepository {
 
       return (data || []).map((a) => this.mapAttendanceFromDatabase(a));
     } catch (error) {
-      console.error("Failed to fetch attendance:", error);
+      safeError("Failed to fetch attendance:", error);
       throw error;
     }
   }
@@ -280,7 +282,7 @@ export class SupabaseTrainingRepository implements TrainingRepository {
 
       return (data || []).map((a) => this.mapAttendanceFromDatabase(a));
     } catch (error) {
-      console.error("Failed to fetch attendance by date:", error);
+      safeError("Failed to fetch attendance by date:", error);
       throw error;
     }
   }
@@ -323,16 +325,17 @@ export class SupabaseTrainingRepository implements TrainingRepository {
    */
   private mapFromDatabase(row: any): TrainingSession {
     return {
-      id: row.id,
+      id: row['id'],
       clubId: this.organizationId,
-      title: row.title,
-      day: row.day_of_week,
-      startTime: row.start_time,
-      endTime: row.end_time,
-      location: row.location,
-      focus: row.focus,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
+      teamId: row['team_id'] || undefined,
+      title: row['title'],
+      day: row['day_of_week'],
+      startTime: row['start_time'],
+      endTime: row['end_time'],
+      location: row['location'],
+      focus: row['focus'],
+      createdAt: row['created_at'],
+      updatedAt: row['updated_at'],
     };
   }
 

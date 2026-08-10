@@ -4,7 +4,7 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRepositories } from "./useRepositories";
+import { useRepositories, useCurrentOrganizationId } from "./useRepositories";
 import type {
   Transaction,
   TransactionListParams,
@@ -16,20 +16,21 @@ import type {
 const financeKeys = {
   all: () => ["transactions"],
   lists: () => [...financeKeys.all(), "list"],
-  list: (params?: TransactionListParams) => [...financeKeys.lists(), params ?? "default"],
+  list: (clubId: string, params?: TransactionListParams) => [...financeKeys.lists(), clubId, params ?? "default"],
   details: () => [...financeKeys.all(), "detail"],
   detail: (id: string) => [...financeKeys.details(), id],
-  totals: () => [...financeKeys.all(), "totals"],
-  balance: () => [...financeKeys.all(), "balance"],
+  totals: (clubId: string) => [...financeKeys.all(), "totals", clubId],
+  balance: (clubId: string) => [...financeKeys.all(), "balance", clubId],
 };
 
 export function useTransactions(params?: TransactionListParams) {
   const repositories = useRepositories();
+  const clubId = useCurrentOrganizationId();
 
   return useQuery({
-    queryKey: financeKeys.list(params),
+    queryKey: financeKeys.list(clubId, params),
     queryFn: async () => {
-      const result = await repositories.finance.list("club-default", params);
+      const result = await repositories.finance.list(clubId, params);
       return result.data || [];
     },
   });
@@ -50,33 +51,36 @@ export function useTransaction(id: string | undefined) {
 
 export function useFinanceTotals() {
   const repositories = useRepositories();
+  const clubId = useCurrentOrganizationId();
 
   return useQuery({
-    queryKey: financeKeys.totals(),
-    queryFn: async () => {
-      return repositories.finance.getTotals("club-default");
+    queryKey: financeKeys.totals(clubId),
+    queryFn: async (): Promise<FinanceTotals> => {
+      return repositories.finance.getTotals(clubId);
     },
   });
 }
 
 export function useFinanceBalance() {
   const repositories = useRepositories();
+  const clubId = useCurrentOrganizationId();
 
   return useQuery({
-    queryKey: financeKeys.balance(),
+    queryKey: financeKeys.balance(clubId),
     queryFn: async () => {
-      return repositories.finance.getBalance("club-default");
+      return repositories.finance.getBalance(clubId);
     },
   });
 }
 
 export function useCreateTransaction() {
   const repositories = useRepositories();
+  const clubId = useCurrentOrganizationId();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (input: CreateTransactionInput) => {
-      return repositories.finance.create("club-default", input);
+      return repositories.finance.create(clubId, input);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: financeKeys.all() });
@@ -101,8 +105,8 @@ export function useUpdateTransaction() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: financeKeys.detail(data.id) });
       queryClient.invalidateQueries({ queryKey: financeKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: financeKeys.totals() });
-      queryClient.invalidateQueries({ queryKey: financeKeys.balance() });
+      queryClient.invalidateQueries({ queryKey: financeKeys.totals(data.id ? "" : "") });
+      queryClient.invalidateQueries({ queryKey: financeKeys.balance(data.id ? "" : "") });
     },
   });
 }
@@ -117,8 +121,6 @@ export function useDeleteTransaction() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: financeKeys.all() });
-      queryClient.invalidateQueries({ queryKey: financeKeys.totals() });
-      queryClient.invalidateQueries({ queryKey: financeKeys.balance() });
     },
   });
 }

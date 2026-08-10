@@ -11,7 +11,12 @@ const initialTeams: Team[] = [
 ];
 
 export class DemoTeamRepository implements TeamRepository {
-  constructor(private storage: DemoStorage) {
+  private storage: DemoStorage;
+  private clubId: string;
+
+  constructor(storage: DemoStorage, clubId: string) {
+    this.storage = storage;
+    this.clubId = clubId;
     if (!this.storage.has("teams")) {
       this.storage.set("teams", initialTeams);
     }
@@ -24,7 +29,7 @@ export class DemoTeamRepository implements TeamRepository {
 
   async getById(id: string): Promise<Team | null> {
     return this.storage.get<Team[]>("teams", undefined, [])
-      .find((t) => t.id === id) || null;
+      .find((t) => t.id === id && t.clubId === this.clubId) || null;
   }
 
   async create(clubId: string, input: CreateTeamInput): Promise<Team> {
@@ -32,11 +37,16 @@ export class DemoTeamRepository implements TeamRepository {
     const newTeam: Team = {
       id: `tm-${Date.now()}`,
       clubId,
-      ...input,
+      name: input.name,
+      ageGroup: input.ageGroup || input.category || "U-17",
+      season: input.season || input.seasonId || "2026",
       status: "Aktif",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
+    if (input.coach !== undefined) {
+      newTeam.coach = input.coach;
+    }
     allTeams.push(newTeam);
     this.storage.set("teams", allTeams);
     return newTeam;
@@ -44,18 +54,22 @@ export class DemoTeamRepository implements TeamRepository {
 
   async update(id: string, input: UpdateTeamInput): Promise<Team> {
     const allTeams = this.storage.get<Team[]>("teams", undefined, []);
-    const index = allTeams.findIndex((t) => t.id === id);
+    const index = allTeams.findIndex((t) => t.id === id && t.clubId === this.clubId);
     if (index === -1) throw new Error("Team not found");
     const old = allTeams[index]!;
     const coach = input.coach !== undefined ? input.coach : old.coach;
+    const category = input.category !== undefined ? input.category : (old as any).category;
+    const seasonId = input.seasonId !== undefined ? input.seasonId : (old as any).seasonId;
     const updated: Team = {
       id: old.id,
       clubId: old.clubId,
       name: input.name ?? old.name,
       ageGroup: input.ageGroup ?? old.ageGroup,
       season: input.season ?? old.season,
+      ...(category !== undefined && { category }),
+      ...(seasonId !== undefined && { seasonId }),
       ...(coach !== undefined && { coach }),
-      status: old.status,
+      status: input.status !== undefined ? (input.status as "Aktif" | "Tidak Aktif") : old.status,
       createdAt: old.createdAt ?? new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -66,7 +80,7 @@ export class DemoTeamRepository implements TeamRepository {
 
   async delete(id: string): Promise<void> {
     const allTeams = this.storage.get<Team[]>("teams", undefined, []);
-    const index = allTeams.findIndex((t) => t.id === id);
+    const index = allTeams.findIndex((t) => t.id === id && t.clubId === this.clubId);
     if (index !== -1) {
       allTeams.splice(index, 1);
       this.storage.set("teams", allTeams);
@@ -74,7 +88,6 @@ export class DemoTeamRepository implements TeamRepository {
   }
 
   async getStats(teamId: string, season: string): Promise<TeamStats> {
-    // Derived from matches (simplified for demo)
     return { apps: 5, goals: 12, assists: 8 };
   }
 }

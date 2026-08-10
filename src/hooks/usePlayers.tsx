@@ -4,7 +4,7 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRepositories } from "./useRepositories";
+import { useRepositories, useCurrentOrganizationId } from "./useRepositories";
 import type {
   Player,
   PlayerListParams,
@@ -16,8 +16,9 @@ import type {
 const playerKeys = {
   all: () => ["players"],
   lists: () => [...playerKeys.all(), "list"],
-  list: (params?: PlayerListParams) => [
+  list: (clubId: string, params?: PlayerListParams) => [
     ...playerKeys.lists(),
+    clubId,
     params ?? "default",
   ],
   details: () => [...playerKeys.all(), "detail"],
@@ -29,11 +30,12 @@ const playerKeys = {
  */
 export function usePlayers(params?: PlayerListParams) {
   const repositories = useRepositories();
+  const clubId = useCurrentOrganizationId();
 
   return useQuery({
-    queryKey: playerKeys.list(params),
+    queryKey: playerKeys.list(clubId, params),
     queryFn: async () => {
-      const result = await repositories.player.list("club-default", params);
+      const result = await repositories.player.list(clubId, params);
       return result.data || [];
     },
   });
@@ -60,11 +62,12 @@ export function usePlayer(id: string | undefined) {
  */
 export function useCreatePlayer() {
   const repositories = useRepositories();
+  const clubId = useCurrentOrganizationId();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (input: CreatePlayerInput) => {
-      return repositories.player.create("club-default", input);
+      return repositories.player.create(clubId, input);
     },
     onSuccess: () => {
       // Invalidate all player queries

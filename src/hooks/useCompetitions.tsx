@@ -4,7 +4,7 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRepositories } from "./useRepositories";
+import { useRepositories, useCurrentOrganizationId } from "./useRepositories";
 import type {
   Competition,
   CreateCompetitionInput,
@@ -14,18 +14,19 @@ import type {
 const competitionKeys = {
   all: () => ["competitions"],
   lists: () => [...competitionKeys.all(), "list"],
-  list: () => [...competitionKeys.lists()],
+  list: (clubId: string) => [...competitionKeys.lists(), clubId],
   details: () => [...competitionKeys.all(), "detail"],
   detail: (id: string) => [...competitionKeys.details(), id],
 };
 
 export function useCompetitions() {
   const repositories = useRepositories();
+  const clubId = useCurrentOrganizationId();
 
   return useQuery({
-    queryKey: competitionKeys.list(),
+    queryKey: competitionKeys.list(clubId),
     queryFn: async () => {
-      return repositories.competition.list("club-default");
+      return repositories.competition.list(clubId);
     },
   });
 }
@@ -45,11 +46,12 @@ export function useCompetition(id: string | undefined) {
 
 export function useCreateCompetition() {
   const repositories = useRepositories();
+  const clubId = useCurrentOrganizationId();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (input: CreateCompetitionInput) => {
-      return repositories.competition.create("club-default", input);
+      return repositories.competition.create(clubId, input);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: competitionKeys.all() });

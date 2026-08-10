@@ -6,7 +6,7 @@ import type { NotificationRepository } from "@/repositories/interfaces";
 import { DemoStorage } from "./storage";
 
 export class DemoNotificationRepository implements NotificationRepository {
-  constructor(private storage: DemoStorage) {
+  constructor(private storage: DemoStorage, private clubId: string) {
     if (!this.storage.has("notifications")) {
       this.storage.set("notifications", []);
     }
@@ -20,13 +20,14 @@ export class DemoNotificationRepository implements NotificationRepository {
 
   async getById(id: string): Promise<Notification | null> {
     return this.storage.get<Notification[]>("notifications", undefined, [])
-      .find((n) => n.id === id) || null;
+      .find((n) => n.id === id && n.clubId === this.clubId) || null;
   }
 
   async create(clubId: string, notification: Omit<Notification, "id" | "createdAt">): Promise<Notification> {
     const allNotifications = this.storage.get<Notification[]>("notifications", undefined, []);
     const newNotif: Notification = {
       ...notification,
+      clubId: this.clubId,
       id: `notif-${Date.now()}`,
       createdAt: new Date().toISOString(),
     };
@@ -37,7 +38,7 @@ export class DemoNotificationRepository implements NotificationRepository {
 
   async markAsRead(id: string): Promise<Notification> {
     const allNotifications = this.storage.get<Notification[]>("notifications", undefined, []);
-    const notification = allNotifications.find((n) => n.id === id);
+    const notification = allNotifications.find((n) => n.id === id && n.clubId === this.clubId);
     if (!notification) throw new Error("Notification not found");
     notification.read = true;
     this.storage.set("notifications", allNotifications);
@@ -56,7 +57,7 @@ export class DemoNotificationRepository implements NotificationRepository {
 
   async delete(id: string): Promise<void> {
     const allNotifications = this.storage.get<Notification[]>("notifications", undefined, []);
-    const index = allNotifications.findIndex((n) => n.id === id);
+    const index = allNotifications.findIndex((n) => n.id === id && n.clubId === this.clubId);
     if (index !== -1) {
       allNotifications.splice(index, 1);
       this.storage.set("notifications", allNotifications);

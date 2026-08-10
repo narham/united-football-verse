@@ -4,21 +4,35 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRepositories } from "./useRepositories";
+import { useRepositories, useCurrentOrganizationId } from "./useRepositories";
 import type { Club } from "@/repositories/interfaces";
 
 const organizationKeys = {
   all: () => ["organization"],
-  club: () => [...organizationKeys.all(), "club"],
+  clubs: () => [...organizationKeys.all(), "clubs"],
+  club: (clubId: string) => [...organizationKeys.all(), "club", clubId],
 };
 
-export function useClub(clubId?: string) {
+export function useClub(overrideClubId?: string) {
+  const repositories = useRepositories();
+  const ctxClubId = useCurrentOrganizationId();
+  const clubId = overrideClubId || ctxClubId;
+
+  return useQuery({
+    queryKey: organizationKeys.club(clubId),
+    queryFn: async () => {
+      return repositories.organization.getClub(clubId);
+    },
+  });
+}
+
+export function useClubs() {
   const repositories = useRepositories();
 
   return useQuery({
-    queryKey: organizationKeys.club(),
+    queryKey: organizationKeys.clubs(),
     queryFn: async () => {
-      return repositories.organization.getClub(clubId || "club-default");
+      return repositories.organization.getClubs();
     },
   });
 }
@@ -37,8 +51,9 @@ export function useUpdateClub() {
     }) => {
       return repositories.organization.updateClub(clubId, data);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: organizationKeys.club() });
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: organizationKeys.club(variables.clubId) });
+      queryClient.invalidateQueries({ queryKey: organizationKeys.clubs() });
     },
   });
 }

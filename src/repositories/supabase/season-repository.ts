@@ -6,6 +6,7 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { safeError } from "@/lib/security/pii";
 import type {
   Season,
   CreateSeasonInput,
@@ -42,7 +43,7 @@ export class SupabaseSeasonRepository implements SeasonRepository {
 
       return (data || []).map((s) => this.mapFromDatabase(s));
     } catch (error) {
-      console.error("Failed to list seasons:", error);
+      safeError("Failed to list seasons:", error);
       throw error;
     }
   }
@@ -69,7 +70,7 @@ export class SupabaseSeasonRepository implements SeasonRepository {
 
       return data ? this.mapFromDatabase(data) : null;
     } catch (error) {
-      console.error("Failed to fetch season:", error);
+      safeError("Failed to fetch season:", error);
       throw error;
     }
   }
@@ -103,7 +104,7 @@ export class SupabaseSeasonRepository implements SeasonRepository {
 
       return this.mapFromDatabase(data);
     } catch (error) {
-      console.error("Failed to create season:", error);
+      safeError("Failed to create season:", error);
       throw error;
     }
   }
@@ -117,9 +118,9 @@ export class SupabaseSeasonRepository implements SeasonRepository {
         updated_at: new Date().toISOString(),
       };
 
-      if (input.name !== undefined) payload.name = input.name;
-      if (input.startDate !== undefined) payload.start_date = input.startDate;
-      if (input.endDate !== undefined) payload.end_date = input.endDate;
+      if (input.name !== undefined) payload['name'] = input.name;
+      if (input.startDate !== undefined) payload['start_date'] = input.startDate;
+      if (input.endDate !== undefined) payload['end_date'] = input.endDate;
       if (input.status !== undefined) {
         // Convert status to database format
         const statusMap: Record<string, string> = {
@@ -130,7 +131,7 @@ export class SupabaseSeasonRepository implements SeasonRepository {
           "DRAFT": "DRAFT",
           "ARCHIVED": "ARCHIVED",
         };
-        payload.status = statusMap[input.status] || input.status;
+        payload['status'] = statusMap[input.status] || input.status;
       }
 
       const { data, error } = await this.supabase
@@ -151,7 +152,7 @@ export class SupabaseSeasonRepository implements SeasonRepository {
 
       return this.mapFromDatabase(data);
     } catch (error) {
-      console.error("Failed to update season:", error);
+      safeError("Failed to update season:", error);
       throw error;
     }
   }
@@ -174,7 +175,7 @@ export class SupabaseSeasonRepository implements SeasonRepository {
         throw error;
       }
     } catch (error) {
-      console.error("Failed to delete season:", error);
+      safeError("Failed to delete season:", error);
       throw error;
     }
   }
@@ -202,7 +203,7 @@ export class SupabaseSeasonRepository implements SeasonRepository {
 
       return data ? this.mapFromDatabase(data) : null;
     } catch (error) {
-      console.error("Failed to fetch active season:", error);
+      safeError("Failed to fetch active season:", error);
       throw error;
     }
   }
@@ -237,7 +238,7 @@ export class SupabaseSeasonRepository implements SeasonRepository {
         throw error;
       }
     } catch (error) {
-      console.error("Failed to set active season:", error);
+      safeError("Failed to set active season:", error);
       throw error;
     }
   }
@@ -254,14 +255,14 @@ export class SupabaseSeasonRepository implements SeasonRepository {
     };
 
     return {
-      id: row.id,
+      id: row['id'],
       clubId: this.organizationId, // Match organization ID
-      name: row.name,
-      startDate: row.start_date,
-      endDate: row.end_date,
-      status: statusMap[row.status] || "Tidak Aktif",
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
+      name: row['name'],
+      startDate: row['start_date'],
+      endDate: row['end_date'],
+      status: statusMap[row['status']] || "Tidak Aktif",
+      createdAt: row['created_at'],
+      updatedAt: row['updated_at'],
     };
   }
 }

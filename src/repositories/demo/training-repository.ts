@@ -7,7 +7,7 @@ import { trainingSessions as initialSessions } from "@/lib/demo-data";
 import { DemoStorage } from "./storage";
 
 export class DemoTrainingRepository implements TrainingRepository {
-  constructor(private storage: DemoStorage) {
+  constructor(private storage: DemoStorage, private clubId: string) {
     if (!this.storage.has("training_sessions")) {
       this.storage.set("training_sessions", initialSessions);
     }
@@ -37,7 +37,7 @@ export class DemoTrainingRepository implements TrainingRepository {
 
   async getById(id: string): Promise<TrainingSession | null> {
     return this.storage.get<TrainingSession[]>("training_sessions", undefined, [])
-      .find((t) => t.id === id) || null;
+      .find((t) => t.id === id && t.clubId === this.clubId) || null;
   }
 
   async create(clubId: string, input: CreateTrainingInput): Promise<TrainingSession> {
@@ -45,10 +45,18 @@ export class DemoTrainingRepository implements TrainingRepository {
     const newSession: TrainingSession = {
       id: `t${Date.now()}`,
       clubId,
-      ...input,
+      title: input.title,
+      day: input.day,
+      startTime: input.startTime,
+      endTime: input.endTime,
+      location: input.location,
+      focus: input.focus,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
+    if (input.teamId !== undefined) {
+      newSession.teamId = input.teamId;
+    }
     allSessions.push(newSession);
     this.storage.set("training_sessions", allSessions);
     return newSession;
@@ -56,7 +64,7 @@ export class DemoTrainingRepository implements TrainingRepository {
 
   async update(id: string, input: UpdateTrainingInput): Promise<TrainingSession> {
     const allSessions = this.storage.get<TrainingSession[]>("training_sessions", undefined, []);
-    const index = allSessions.findIndex((t) => t.id === id);
+    const index = allSessions.findIndex((t) => t.id === id && t.clubId === this.clubId);
     if (index === -1) throw new Error("Training session not found");
     const old = allSessions[index]!;
     const updated: TrainingSession = {
@@ -71,6 +79,11 @@ export class DemoTrainingRepository implements TrainingRepository {
       createdAt: old.createdAt ?? new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
+    if (input.teamId !== undefined) {
+      updated.teamId = input.teamId;
+    } else if (old.teamId !== undefined) {
+      updated.teamId = old.teamId;
+    }
     allSessions[index] = updated;
     this.storage.set("training_sessions", allSessions);
     return updated;
@@ -78,7 +91,7 @@ export class DemoTrainingRepository implements TrainingRepository {
 
   async delete(id: string): Promise<void> {
     const allSessions = this.storage.get<TrainingSession[]>("training_sessions", undefined, []);
-    const index = allSessions.findIndex((t) => t.id === id);
+    const index = allSessions.findIndex((t) => t.id === id && t.clubId === this.clubId);
     if (index !== -1) {
       allSessions.splice(index, 1);
       this.storage.set("training_sessions", allSessions);
@@ -88,7 +101,6 @@ export class DemoTrainingRepository implements TrainingRepository {
   async recordAttendance(input: RecordAttendanceInput): Promise<Attendance> {
     const allAttendance = this.storage.get<Attendance[]>("attendance", undefined, []);
     
-    // Check if already exists
     const existing = allAttendance.find(
       (a) => a.trainingId === input.trainingId && a.playerId === input.playerId && a.date === input.date
     );
@@ -116,7 +128,6 @@ export class DemoTrainingRepository implements TrainingRepository {
   }
 
   async getAttendanceByDate(clubId: string, date: string): Promise<Attendance[]> {
-    // Get trainings for club on date, then get attendance
     return this.storage.get<Attendance[]>("attendance", undefined, [])
       .filter((a) => a.date === date);
   }

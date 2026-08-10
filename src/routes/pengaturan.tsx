@@ -10,7 +10,10 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { club, staff } from "@/lib/demo-data";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ErrorBanner } from "@/components/error-state";
+import { useClub } from "@/hooks/useOrganization";
+import { useStaff } from "@/hooks/useStaff";
 
 export const Route = createFileRoute("/pengaturan")({
   head: () => ({
@@ -54,6 +57,11 @@ function Field({
 
 function PengaturanPage() {
   const [theme, setTheme] = useState<"light" | "dark" | "system">("system");
+  const { data: club, isLoading: clubLoading, error: clubError, refetch: refetchClub } = useClub();
+  const { data: staff = [], isLoading: staffLoading, error: staffError, refetch: refetchStaff } = useStaff();
+  const isLoading = clubLoading || staffLoading;
+  const error = clubError || staffError;
+  const refetch = () => { refetchClub(); refetchStaff(); };
 
   const applyTheme = (mode: "light" | "dark" | "system") => {
     setTheme(mode);
@@ -66,6 +74,32 @@ function PengaturanPage() {
       if (prefersDark) root.classList.add("dark");
     }
   };
+
+  if (error) {
+    return (
+      <>
+        <AppHeader
+          title="Pengaturan"
+          subtitle="Profil klub, preferensi antarmuka, & info sistem Football OS"
+        />
+        <main className="flex-1 space-y-6 p-4 md:p-6">
+          <ErrorBanner
+            title="Gagal memuat data pengaturan"
+            description={(error as Error)?.message ?? "Silakan coba lagi."}
+            onRetry={refetch}
+          />
+        </main>
+      </>
+    );
+  }
+
+  const clubName = club?.name ?? "SSB Garuda Muda";
+  const clubShort = club?.short ?? "GRD";
+  const clubCity = club?.city ?? "Bandung";
+  const clubFounded = club?.foundedYear ?? 2012;
+  const clubSeason = club?.season ?? "2026/2027";
+  const clubSport = club?.sport ?? "Sepak Bola";
+  const clubOrgId = club?.footballOrgId ?? "ASPJABAR-SSB-0127";
 
   return (
     <>
@@ -83,43 +117,51 @@ function PengaturanPage() {
             <div className="flex-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <h2 className="font-display text-2xl text-foreground">
-                  {club.name}
+                  {isLoading ? <Skeleton className="h-7 w-48 inline-block align-middle" /> : clubName}
                 </h2>
-                <Badge variant="outline" className="bg-field/5 border-field/30 text-field">
-                  {club.footballOrgId}
-                </Badge>
+                {!isLoading && (
+                  <Badge variant="outline" className="bg-field/5 border-field/30 text-field">
+                    {clubOrgId}
+                  </Badge>
+                )}
               </div>
               <p className="text-sm text-muted-foreground mt-1">
-                {club.city} • Berdiri {club.foundedYear} • Musim {club.season} •{" "}
-                {club.sport}
+                {isLoading ? (
+                  <Skeleton className="h-4 w-80 max-w-full" />
+                ) : (
+                  <>
+                    {clubCity} • Berdiri {clubFounded} • Musim {clubSeason} •{" "}
+                    {clubSport}
+                  </>
+                )}
               </p>
             </div>
           </div>
           <Separator className="my-5" />
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <Field label="Nama Klub">
-              <Input defaultValue={club.name} />
+              <Input defaultValue={clubName} />
             </Field>
             <Field label="Singkatan / Kode">
-              <Input defaultValue={club.short} />
+              <Input defaultValue={clubShort} />
             </Field>
             <Field label="Kota Domisili">
-              <Input defaultValue={club.city} />
+              <Input defaultValue={clubCity} />
             </Field>
             <Field label="Tahun Berdiri">
-              <Input defaultValue={String(club.foundedYear)} />
+              <Input defaultValue={String(clubFounded)} />
             </Field>
             <Field label="Musim Aktif">
-              <Input defaultValue={club.season} />
+              <Input defaultValue={clubSeason} />
             </Field>
             <Field label="Cabang Olahraga (Sport)">
-              <Input defaultValue={club.sport} />
+              <Input defaultValue={clubSport} />
             </Field>
             <Field
               label="ID Organisasi (FSSI / Asprov)"
               hint="Football ID referensi ke induk organisasi (backend mendatang)"
             >
-              <Input defaultValue={club.footballOrgId ?? ""} />
+              <Input defaultValue={clubOrgId} />
             </Field>
           </div>
           <div className="mt-5 flex flex-wrap justify-end gap-2">
@@ -342,21 +384,34 @@ function PengaturanPage() {
             <p className="text-xs uppercase tracking-wide text-muted-foreground">
               Staf Terdaftar (CAP-ORG-003)
             </p>
-            <p className="mt-1.5 font-display text-2xl text-foreground">
-              {staff.length} orang
-            </p>
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {staff.slice(0, 4).map((s) => (
-                <Badge key={s.id} variant="outline" className="text-xs">
-                  {s.role}
-                </Badge>
-              ))}
-              {staff.length > 4 && (
-                <Badge variant="outline" className="text-xs">
-                  +{staff.length - 4} lainnya
-                </Badge>
-              )}
-            </div>
+            {isLoading ? (
+              <div className="mt-1.5 space-y-2">
+                <Skeleton className="h-8 w-28" />
+                <div className="flex flex-wrap gap-1.5">
+                  <Skeleton className="h-5 w-24 rounded-full" />
+                  <Skeleton className="h-5 w-28 rounded-full" />
+                  <Skeleton className="h-5 w-24 rounded-full" />
+                </div>
+              </div>
+            ) : (
+              <>
+                <p className="mt-1.5 font-display text-2xl text-foreground">
+                  {staff.length} orang
+                </p>
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {staff.slice(0, 4).map((s) => (
+                    <Badge key={s.id} variant="outline" className="text-xs">
+                      {s.role}
+                    </Badge>
+                  ))}
+                  {staff.length > 4 && (
+                    <Badge variant="outline" className="text-xs">
+                      +{staff.length - 4} lainnya
+                    </Badge>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         </section>
       </main>

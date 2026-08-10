@@ -4,24 +4,26 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRepositories } from "./useRepositories";
-import type { Team, CreateTeamInput, UpdateTeamInput } from "@/repositories/interfaces";
+import { useRepositories, useCurrentOrganizationId } from "./useRepositories";
+import type { Team, CreateTeamInput, UpdateTeamInput, TeamStats } from "@/repositories/interfaces";
 
 const teamKeys = {
   all: () => ["teams"],
   lists: () => [...teamKeys.all(), "list"],
-  list: () => [...teamKeys.lists()],
+  list: (clubId: string) => [...teamKeys.lists(), clubId],
   details: () => [...teamKeys.all(), "detail"],
   detail: (id: string) => [...teamKeys.details(), id],
+  stats: (teamId: string, season: string) => [...teamKeys.all(), "stats", teamId, season],
 };
 
 export function useTeams() {
   const repositories = useRepositories();
+  const clubId = useCurrentOrganizationId();
 
   return useQuery({
-    queryKey: teamKeys.list(),
+    queryKey: teamKeys.list(clubId),
     queryFn: async () => {
-      return repositories.team.list("club-default");
+      return repositories.team.list(clubId);
     },
   });
 }
@@ -39,13 +41,27 @@ export function useTeam(id: string | undefined) {
   });
 }
 
+export function useTeamStats(teamId: string | undefined, season: string) {
+  const repositories = useRepositories();
+
+  return useQuery({
+    queryKey: teamKeys.stats(teamId || "", season),
+    queryFn: async (): Promise<TeamStats> => {
+      if (!teamId) return { apps: 0, goals: 0, assists: 0 };
+      return repositories.team.getStats(teamId, season);
+    },
+    enabled: !!teamId,
+  });
+}
+
 export function useCreateTeam() {
   const repositories = useRepositories();
+  const clubId = useCurrentOrganizationId();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (input: CreateTeamInput) => {
-      return repositories.team.create("club-default", input);
+      return repositories.team.create(clubId, input);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: teamKeys.all() });

@@ -6,6 +6,7 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { safeError } from "@/lib/security/pii";
 import type {
   Competition,
   CreateCompetitionInput,
@@ -39,7 +40,7 @@ export class SupabaseCompetitionRepository implements CompetitionRepository {
 
       return (data || []).map((c) => this.mapFromDatabase(c));
     } catch (error) {
-      console.error("Failed to list competitions:", error);
+      safeError("Failed to list competitions:", error);
       throw error;
     }
   }
@@ -65,7 +66,7 @@ export class SupabaseCompetitionRepository implements CompetitionRepository {
 
       return data ? this.mapFromDatabase(data) : null;
     } catch (error) {
-      console.error("Failed to fetch competition:", error);
+      safeError("Failed to fetch competition:", error);
       throw error;
     }
   }
@@ -99,7 +100,7 @@ export class SupabaseCompetitionRepository implements CompetitionRepository {
 
       return this.mapFromDatabase(data);
     } catch (error) {
-      console.error("Failed to create competition:", error);
+      safeError("Failed to create competition:", error);
       throw error;
     }
   }
@@ -116,9 +117,9 @@ export class SupabaseCompetitionRepository implements CompetitionRepository {
         updated_at: new Date().toISOString(),
       };
 
-      if (input.name !== undefined) payload.name = input.name;
-      if (input.level !== undefined) payload.level = input.level;
-      if (input.seasonId !== undefined) payload.season_id = input.seasonId;
+      if (input.name !== undefined) payload['name'] = input.name;
+      if (input.level !== undefined) payload['level'] = input.level;
+      if (input.seasonId !== undefined) payload['season_id'] = input.seasonId;
 
       const { data, error } = await this.supabase
         .from("competitions")
@@ -138,7 +139,7 @@ export class SupabaseCompetitionRepository implements CompetitionRepository {
 
       return this.mapFromDatabase(data);
     } catch (error) {
-      console.error("Failed to update competition:", error);
+      safeError("Failed to update competition:", error);
       throw error;
     }
   }
@@ -161,7 +162,7 @@ export class SupabaseCompetitionRepository implements CompetitionRepository {
         throw error;
       }
     } catch (error) {
-      console.error("Failed to delete competition:", error);
+      safeError("Failed to delete competition:", error);
       throw error;
     }
   }
@@ -171,12 +172,13 @@ export class SupabaseCompetitionRepository implements CompetitionRepository {
    */
   private mapFromDatabase(row: any): Competition {
     return {
-      id: row.id,
-      name: row.name,
-      season: row.season_id || "2026/2027",
-      level: row.level || "Kompetisi",
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
+      id: row['id'],
+      clubId: this.organizationId,
+      name: row['name'],
+      season: row['season_id'] || "2026/2027",
+      level: row['level'] || "Kompetisi",
+      createdAt: row['created_at'],
+      updatedAt: row['updated_at'],
     };
   }
 }
