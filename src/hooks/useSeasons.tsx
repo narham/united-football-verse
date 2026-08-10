@@ -22,7 +22,7 @@ export function useSeasons() {
   return useQuery({
     queryKey: seasonKeys.list(),
     queryFn: async () => {
-      return repositories.season.list();
+      return repositories.season.list("club-default");
     },
   });
 }
@@ -33,7 +33,7 @@ export function useActiveSeason() {
   return useQuery({
     queryKey: seasonKeys.active(),
     queryFn: async () => {
-      return repositories.season.getActive();
+      return repositories.season.getActive("club-default");
     },
   });
 }

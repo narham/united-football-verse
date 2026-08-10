@@ -66,7 +66,7 @@ function PemainPage() {
   );
 
   if (isLoading) {
-    return <DefaultLoadingState message="Memuat daftar pemain..." />;
+    return <DefaultLoadingState rows={5} />;
   }
 
   if (error) {

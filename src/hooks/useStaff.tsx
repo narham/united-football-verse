@@ -15,7 +15,7 @@ import type {
 const staffKeys = {
   all: () => ["staff"],
   lists: () => [...staffKeys.all(), "list"],
-  list: (params?: StaffListParams) => [...staffKeys.lists(), params],
+  list: (params?: StaffListParams) => [...staffKeys.lists(), params ?? "default"],
   details: () => [...staffKeys.all(), "detail"],
   detail: (id: string) => [...staffKeys.details(), id],
 };
@@ -26,7 +26,8 @@ export function useStaff(params?: StaffListParams) {
   return useQuery({
     queryKey: staffKeys.list(params),
     queryFn: async () => {
-      return repositories.staff.list(params);
+      const result = await repositories.staff.list("club-default", params);
+      return result.data || [];
     },
   });
 }

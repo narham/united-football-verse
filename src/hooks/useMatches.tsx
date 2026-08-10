@@ -15,7 +15,7 @@ import type {
 const matchKeys = {
   all: () => ["matches"],
   lists: () => [...matchKeys.all(), "list"],
-  list: (params?: MatchListParams) => [...matchKeys.lists(), params],
+  list: (params?: MatchListParams) => [...matchKeys.lists(), params ?? "default"],
   details: () => [...matchKeys.all(), "detail"],
   detail: (id: string) => [...matchKeys.details(), id],
   upcoming: () => [...matchKeys.all(), "upcoming"],
@@ -28,7 +28,8 @@ export function useMatches(params?: MatchListParams) {
   return useQuery({
     queryKey: matchKeys.list(params),
     queryFn: async () => {
-      return repositories.match.list(params);
+      const result = await repositories.match.list("club-default", params);
+      return result.data || [];
     },
   });
 }
@@ -52,7 +53,7 @@ export function useUpcomingMatches() {
   return useQuery({
     queryKey: matchKeys.upcoming(),
     queryFn: async () => {
-      return repositories.match.getUpcoming();
+      return repositories.match.getUpcoming("club-default");
     },
   });
 }
@@ -63,7 +64,7 @@ export function usePastMatches() {
   return useQuery({
     queryKey: matchKeys.past(),
     queryFn: async () => {
-      return repositories.match.getPast();
+      return repositories.match.getPast("club-default");
     },
   });
 }

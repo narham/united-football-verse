@@ -21,7 +21,7 @@ export function useTeams() {
   return useQuery({
     queryKey: teamKeys.list(),
     queryFn: async () => {
-      return repositories.team.list();
+      return repositories.team.list("club-default");
     },
   });
 }

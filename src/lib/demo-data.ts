@@ -59,6 +59,7 @@ export interface Player {
   tinggi: number;
   berat: number;
   kaki: "Kiri" | "Kanan";
+  citizenship?: "INDONESIAN" | "FOREIGN"; // Citizenship type (added for identity documents)
   fotoUrl?: string;
   stats: SeasonStat[];
 }
@@ -400,3 +401,144 @@ export function playerPerformanceRating(player: Player, season = "2025/2026") {
     : "Belum Optimal";
   return { score, grade, label };
 }
+
+// ============================================================
+// IDENTITY DOCUMENTS — Synthetic Test Data (DO NOT USE REAL DATA)
+// ============================================================
+// Demo identity documents for testing Indonesian & foreign citizenship
+// All values are clearly synthetic and for testing purposes only
+
+export interface IdentityDocument {
+  id: string;
+  playerId: string;
+  documentType: "NIK" | "PASSPORT" | "KITAS";
+  documentNumber: string;
+  issuingCountry: string;
+  issuedAt?: string;
+  expiresAt?: string;
+  verificationStatus: "UNVERIFIED" | "PENDING" | "VERIFIED" | "REJECTED" | "EXPIRED";
+  verifiedAt?: string;
+  rejectionReason?: string;
+  createdAt: string;
+  updatedAt: string;
+  clubId: string;
+}
+
+export const identityDocuments: IdentityDocument[] = [
+  // Indonesian citizens with NIK (verified)
+  {
+    id: "id1",
+    playerId: "p1", // Bagas Pratama
+    documentType: "NIK",
+    documentNumber: "3271001203080001", // Test synthetic NIK
+    issuingCountry: "Indonesia",
+    issuedAt: "2021-01-15",
+    // NIK doesn't expire - no expiresAt property
+    verificationStatus: "VERIFIED",
+    verifiedAt: "2026-06-01T10:00:00Z",
+    createdAt: "2026-01-01T00:00:00Z",
+    updatedAt: "2026-06-01T10:00:00Z",
+    clubId: DEFAULT_CLUB_ID,
+  },
+  {
+    id: "id2",
+    playerId: "p2", // Rizky Maulana
+    documentType: "NIK",
+    documentNumber: "3201107204070002", // Test synthetic NIK
+    issuingCountry: "Indonesia",
+    issuedAt: "2020-11-20",
+    verificationStatus: "VERIFIED",
+    verifiedAt: "2026-06-15T10:00:00Z",
+    createdAt: "2026-01-05T00:00:00Z",
+    updatedAt: "2026-06-15T10:00:00Z",
+    clubId: DEFAULT_CLUB_ID,
+  },
+  {
+    id: "id3",
+    playerId: "p7", // Galang Saputra
+    documentType: "NIK",
+    documentNumber: "3175209107070003", // Test synthetic NIK
+    issuingCountry: "Indonesia",
+    issuedAt: "2020-07-25",
+    verificationStatus: "PENDING",
+    createdAt: "2026-08-05T00:00:00Z",
+    updatedAt: "2026-08-05T00:00:00Z",
+    clubId: DEFAULT_CLUB_ID,
+  },
+
+  // Foreign citizens with Passport (various statuses)
+  {
+    id: "id4",
+    playerId: "p11", // Surya Darma (simulating foreign player)
+    documentType: "PASSPORT",
+    documentNumber: "M12345678", // Test synthetic passport
+    issuingCountry: "Malaysia",
+    issuedAt: "2020-06-10",
+    expiresAt: "2030-06-09",
+    verificationStatus: "VERIFIED",
+    verifiedAt: "2026-07-01T10:00:00Z",
+    createdAt: "2026-02-01T00:00:00Z",
+    updatedAt: "2026-07-01T10:00:00Z",
+    clubId: DEFAULT_CLUB_ID,
+  },
+  {
+    id: "id5",
+    playerId: "p12", // Kevin Halim
+    documentType: "PASSPORT",
+    documentNumber: "SG87654321", // Test synthetic passport
+    issuingCountry: "Singapore",
+    issuedAt: "2019-09-15",
+    expiresAt: "2024-09-14", // EXPIRED
+    verificationStatus: "EXPIRED",
+    verifiedAt: "2026-05-20T10:00:00Z",
+    createdAt: "2026-03-01T00:00:00Z",
+    updatedAt: "2026-08-01T00:00:00Z",
+    clubId: DEFAULT_CLUB_ID,
+  },
+
+  // Foreign citizen with KITAS
+  {
+    id: "id6",
+    playerId: "p13", // Tio Fernandes
+    documentType: "KITAS",
+    documentNumber: "2C98765432", // Test synthetic KITAS
+    issuingCountry: "Indonesia (Issued for Foreign National)",
+    issuedAt: "2023-03-01",
+    expiresAt: "2028-03-01",
+    verificationStatus: "VERIFIED",
+    verifiedAt: "2026-07-15T10:00:00Z",
+    createdAt: "2026-04-01T00:00:00Z",
+    updatedAt: "2026-07-15T10:00:00Z",
+    clubId: DEFAULT_CLUB_ID,
+  },
+  {
+    id: "id7",
+    playerId: "p19", // Ega Prasetyo (simulating foreign player)
+    documentType: "KITAS",
+    documentNumber: "2C11223344", // Test synthetic KITAS
+    issuingCountry: "Indonesia (Issued for Foreign National)",
+    issuedAt: "2024-01-10",
+    expiresAt: "2026-06-30", // EXPIRED
+    verificationStatus: "EXPIRED",
+    verifiedAt: "2026-05-01T10:00:00Z",
+    createdAt: "2026-02-15T00:00:00Z",
+    updatedAt: "2026-08-05T00:00:00Z",
+    clubId: DEFAULT_CLUB_ID,
+  },
+
+  // Rejected identity document (example)
+  {
+    id: "id8",
+    playerId: "p20", // Zaki Maulana
+    documentType: "PASSPORT",
+    documentNumber: "TH55667788", // Test synthetic passport
+    issuingCountry: "Thailand",
+    issuedAt: "2021-02-20",
+    expiresAt: "2031-02-19",
+    verificationStatus: "REJECTED",
+    rejectionReason: "Dokumen kurang jelas, silakan upload ulang",
+    createdAt: "2026-07-20T00:00:00Z",
+    updatedAt: "2026-08-01T00:00:00Z",
+    clubId: DEFAULT_CLUB_ID,
+  },
+];

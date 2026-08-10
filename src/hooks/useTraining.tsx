@@ -17,7 +17,7 @@ import type {
 const trainingKeys = {
   all: () => ["training"],
   lists: () => [...trainingKeys.all(), "list"],
-  list: (params?: TrainingListParams) => [...trainingKeys.lists(), params],
+  list: (params?: TrainingListParams) => [...trainingKeys.lists(), params ?? "default"],
   details: () => [...trainingKeys.all(), "detail"],
   detail: (id: string) => [...trainingKeys.details(), id],
   attendance: () => [...trainingKeys.all(), "attendance"],
@@ -30,7 +30,8 @@ export function useTrainingSessions(params?: TrainingListParams) {
   return useQuery({
     queryKey: trainingKeys.list(params),
     queryFn: async () => {
-      return repositories.training.list(params);
+      const result = await repositories.training.list("club-default", params);
+      return result.data || [];
     },
   });
 }
@@ -48,16 +49,16 @@ export function useTrainingSession(id: string | undefined) {
   });
 }
 
-export function useAttendance(sessionId: string | undefined) {
+export function useAttendance(trainingId: string | undefined) {
   const repositories = useRepositories();
 
   return useQuery({
-    queryKey: trainingKeys.attendanceBySession(sessionId || ""),
+    queryKey: trainingKeys.attendanceBySession(trainingId || ""),
     queryFn: async () => {
-      if (!sessionId) return [];
-      return repositories.training.getAttendance(sessionId);
+      if (!trainingId) return [];
+      return repositories.training.getAttendance(trainingId);
     },
-    enabled: !!sessionId,
+    enabled: !!trainingId,
   });
 }
 
@@ -120,7 +121,7 @@ export function useRecordAttendance() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({
-        queryKey: trainingKeys.attendanceBySession(data.sessionId),
+        queryKey: trainingKeys.attendanceBySession(data.trainingId),
       });
     },
   });

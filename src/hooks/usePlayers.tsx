@@ -18,7 +18,7 @@ const playerKeys = {
   lists: () => [...playerKeys.all(), "list"],
   list: (params?: PlayerListParams) => [
     ...playerKeys.lists(),
-    params,
+    params ?? "default",
   ],
   details: () => [...playerKeys.all(), "detail"],
   detail: (id: string) => [...playerKeys.details(), id],
@@ -33,7 +33,8 @@ export function usePlayers(params?: PlayerListParams) {
   return useQuery({
     queryKey: playerKeys.list(params),
     queryFn: async () => {
-      return repositories.player.list(params);
+      const result = await repositories.player.list("club-default", params);
+      return result.data || [];
     },
   });
 }

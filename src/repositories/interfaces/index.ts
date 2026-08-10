@@ -47,16 +47,30 @@ import type {
   SeasonStat,
 } from "./types";
 
+import type {
+  IdentityDocument,
+  CreateIdentityDocumentInput,
+  UpdateIdentityDocumentInput,
+  CitizenshipType,
+  IdentityDocumentType,
+  IdentityVerificationStatus,
+} from "../../domain/identity/identity-document";
+
+import type { IdentityDocumentRepository } from "./identity-document-repository";
+
 export type {
   Player,
   PlayerListParams,
   CreatePlayerInput,
   UpdatePlayerInput,
+  PlayerPosition,
+  PlayerStatus,
   ListResult,
   Staff,
   StaffListParams,
   CreateStaffInput,
   UpdateStaffInput,
+  StaffRole,
   Team,
   CreateTeamInput,
   UpdateTeamInput,
@@ -67,6 +81,7 @@ export type {
   TrainingListParams,
   CreateTrainingInput,
   UpdateTrainingInput,
+  AttendanceStatus,
   Attendance,
   RecordAttendanceInput,
   Competition,
@@ -77,10 +92,13 @@ export type {
   CreateMatchInput,
   UpdateMatchInput,
   MatchResult,
+  MatchVenue,
   Transaction,
   TransactionListParams,
   CreateTransactionInput,
   UpdateTransactionInput,
+  TransactionType,
+  TransactionCategory,
   FinanceTotals,
   TeamStats,
   MatchRecordStats,
@@ -90,6 +108,15 @@ export type {
   Club,
   SeasonStat,
 } from "./types";
+
+export type {
+  IdentityDocument,
+  CreateIdentityDocumentInput,
+  UpdateIdentityDocumentInput,
+  CitizenshipType,
+  IdentityDocumentType,
+  IdentityVerificationStatus,
+} from "../../domain/identity/identity-document";
 
 // ============================================================
 // Player Repository
@@ -226,6 +253,11 @@ export interface OrganizationRepository {
 }
 
 // ============================================================
+// Identity Document Repository
+// ============================================================
+export type { IdentityDocumentRepository } from "./identity-document-repository";
+
+// ============================================================
 // Repository Container (Dependency Injection)
 // ============================================================
 export interface Repositories {
@@ -240,6 +272,7 @@ export interface Repositories {
   notification: NotificationRepository;
   activity: ActivityRepository;
   organization: OrganizationRepository;
+  identityDocument: IdentityDocumentRepository;
 }
 
 // ============================================================

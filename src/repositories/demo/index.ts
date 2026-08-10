@@ -15,6 +15,7 @@ import { DemoFinanceRepository } from "./finance-repository";
 import { DemoNotificationRepository } from "./notification-repository";
 import { DemoActivityRepository } from "./activity-repository";
 import { DemoOrganizationRepository } from "./organization-repository";
+import { DemoIdentityDocumentRepository } from "./identity-document-repository";
 import { DemoStorage } from "./storage";
 
 export function createDemoRepositories(clubId: string): Repositories {
@@ -32,5 +33,6 @@ export function createDemoRepositories(clubId: string): Repositories {
     notification: new DemoNotificationRepository(storage),
     activity: new DemoActivityRepository(storage),
     organization: new DemoOrganizationRepository(storage),
+    identityDocument: new DemoIdentityDocumentRepository(storage),
   };
 }

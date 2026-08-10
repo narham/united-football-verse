@@ -25,7 +25,7 @@ export function useCompetitions() {
   return useQuery({
     queryKey: competitionKeys.list(),
     queryFn: async () => {
-      return repositories.competition.list();
+      return repositories.competition.list("club-default");
     },
   });
 }

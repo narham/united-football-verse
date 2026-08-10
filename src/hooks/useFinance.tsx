@@ -16,7 +16,7 @@ import type {
 const financeKeys = {
   all: () => ["transactions"],
   lists: () => [...financeKeys.all(), "list"],
-  list: (params?: TransactionListParams) => [...financeKeys.lists(), params],
+  list: (params?: TransactionListParams) => [...financeKeys.lists(), params ?? "default"],
   details: () => [...financeKeys.all(), "detail"],
   detail: (id: string) => [...financeKeys.details(), id],
   totals: () => [...financeKeys.all(), "totals"],
@@ -29,7 +29,8 @@ export function useTransactions(params?: TransactionListParams) {
   return useQuery({
     queryKey: financeKeys.list(params),
     queryFn: async () => {
-      return repositories.finance.list(params);
+      const result = await repositories.finance.list("club-default", params);
+      return result.data || [];
     },
   });
 }
@@ -53,7 +54,7 @@ export function useFinanceTotals() {
   return useQuery({
     queryKey: financeKeys.totals(),
     queryFn: async () => {
-      return repositories.finance.getTotals();
+      return repositories.finance.getTotals("club-default");
     },
   });
 }
@@ -64,7 +65,7 @@ export function useFinanceBalance() {
   return useQuery({
     queryKey: financeKeys.balance(),
     queryFn: async () => {
-      return repositories.finance.getBalance();
+      return repositories.finance.getBalance("club-default");
     },
   });
 }
