@@ -7,6 +7,7 @@
  * - Supabase repositories (PostgreSQL, real backend)
  */
 
+import "@/lib/ssr-local-storage";
 import { createContext, useContext, ReactNode, useMemo } from "react";
 import type { Repositories } from "@/repositories/interfaces";
 import { createDemoRepositories } from "@/repositories/demo";
