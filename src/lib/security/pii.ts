@@ -165,3 +165,96 @@ export function decideIdentityAccess(params: {
     // Unauthenticated / no role → hide
     return "HIDE";
 }
+
+/* ============================================================
+ * PHASE 6 STEP 5 REMEDIATION — P1-3
+ * Centralized PII PROTECTION BOUNDARY
+ *
+ *   Repository / DB error  ─┐
+ *   Domain event payload   ─┼─►  sanitize*  ─►  UI / Logs / Events / URLs
+ *   Console / analytics    ─┘
+ *
+ * Everything crossing OUT of the repository layer must pass through
+ * one of the functions below.
+ * ============================================================ */
+
+/**
+ * Patterns that may represent a full identity document number.
+ *  - NIK: exactly 16 digits
+ *  - Any digit run of 6+ (passport/KITAS numeric tails, DB constraint echoes)
+ *  - Passport-like: 1-2 letters followed by 6+ digits
+ */
+const PII_VALUE_PATTERNS: readonly RegExp[] = [
+    /\b[A-Za-z]{1,2}\d{6,}\b/g,
+    /\b\d{6,}\b/g,
+];
+
+export const PII_PLACEHOLDER = "[REDACTED]";
+
+/** True when a string plausibly contains a full identity document number. */
+export function containsPII(value: string | null | undefined): boolean {
+    if (!value) return false;
+    return PII_VALUE_PATTERNS.some((re) => {
+        re.lastIndex = 0;
+        return re.test(value);
+    });
+}
+
+/**
+ * Strip identity-document-like values from any free text
+ * (DB constraint messages, third party errors, toast copy).
+ */
+export function sanitizeText(text: string | null | undefined): string {
+    if (!text) return "";
+    let out = text;
+    for (const re of PII_VALUE_PATTERNS) {
+        out = out.replace(new RegExp(re.source, "g"), PII_PLACEHOLDER);
+    }
+    return out;
+}
+
+/**
+ * Safe, user-facing messages for identity operations.
+ * NEVER interpolate a document number into an error.
+ */
+export const IDENTITY_ERROR = {
+    DUPLICATE: "Dokumen identitas sudah terdaftar",
+    NOT_FOUND: "Dokumen identitas tidak ditemukan",
+    INVALID: "Dokumen identitas tidak valid",
+    FAILED: "Operasi dokumen identitas gagal",
+} as const;
+
+/** Wrap any thrown value into a PII-free Error. */
+export function sanitizeError(error: unknown, fallback = IDENTITY_ERROR.FAILED): Error {
+    const raw = error instanceof Error ? error.message : typeof error === "string" ? error : "";
+    const clean = sanitizeText(raw).trim();
+    return new Error(clean.length > 0 ? clean : fallback);
+}
+
+/**
+ * Sanitize a domain event / activity feed / analytics payload.
+ * Removes PII keys and scrubs identity-like values from string fields.
+ */
+export function sanitizeEventPayload<T>(payload: T): unknown {
+    const redacted = redactPII(payload);
+    const walk = (value: unknown): unknown => {
+        if (typeof value === "string") return sanitizeText(value);
+        if (Array.isArray(value)) return value.map(walk);
+        if (value && typeof value === "object") {
+            const out: Record<string, unknown> = {};
+            for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+                out[k] = walk(v);
+            }
+            return out;
+        }
+        return value;
+    };
+    return walk(redacted);
+}
+
+/** Guard for URL/route params — identity numbers must never enter a URL. */
+export function assertNoPIIInUrl(url: string): void {
+    if (containsPII(url)) {
+        throw new Error("Identity data must not be placed in a URL");
+    }
+}
