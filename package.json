@@ -9,7 +9,10 @@
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:legacy": "node src/__tests__/auth-simple.test.js && node src/__tests__/membership-simple.test.js && node src/__tests__/rbac-simple.test.js && node src/__tests__/regression-simple.test.js && node src/__tests__/cross-org-security.test.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
