@@ -1,5 +1,5 @@
 import { Clock, MapPin, Users } from "lucide-react";
-import { trainingSessions, type TrainingSession } from "@/lib/demo-data";
+import type { TrainingSession } from "@/repositories/interfaces/types";
 import { Button } from "@/components/ui/button";
 
 function TrainingSessionRow({ t }: { t: TrainingSession }) {
@@ -39,9 +39,9 @@ function TrainingSessionRow({ t }: { t: TrainingSession }) {
 }
 
 export function TrainingSchedule({
-  sessions = trainingSessions,
+  sessions,
 }: {
-  sessions?: TrainingSession[];
+  sessions: TrainingSession[];
 }) {
   if (sessions.length === 0) {
     return (
