@@ -5,7 +5,10 @@ export default defineConfig({
   plugins: [tsconfigPaths()],
   test: {
     environment: "node",
-    include: ["src/**/*.test.{ts,tsx,js}"],
+    // Legacy standalone scripts (*-simple.test.js, auth-verification.test.ts) are
+    // node scripts that call process.exit — they are executed separately, not by vitest.
+    include: ["src/**/*.test.ts"],
+    exclude: ["**/node_modules/**", "src/__tests__/auth-verification.test.ts"],
     globals: false,
   },
 });

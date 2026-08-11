@@ -84,6 +84,10 @@ const PII_KEYS: ReadonlySet<string> = new Set([
     "fullKitas",
 ]);
 
+const PII_KEYS_LOWER: ReadonlySet<string> = new Set(
+    Array.from(PII_KEYS).map((k) => k.toLowerCase()),
+);
+
 export function redactPII<T>(value: T): unknown {
     if (value === null || value === undefined) return value;
     if (typeof value !== "object") return value;
@@ -91,7 +95,7 @@ export function redactPII<T>(value: T): unknown {
 
     const out: Record<string, unknown> = {};
     for (const [key, val] of Object.entries(value as Record<string, unknown>)) {
-        if (PII_KEYS.has(key.toLowerCase())) {
+        if (PII_KEYS_LOWER.has(key.toLowerCase())) {
             out[key] = "[REDACTED PII]";
         } else {
             out[key] = redactPII(val);
