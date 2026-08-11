@@ -27,11 +27,15 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
-import { club, players, trainingSessions } from "@/lib/demo-data";
+import { useClub } from "@/hooks/useOrganization";
+import { usePlayers } from "@/hooks/usePlayers";
+import { useTrainingSessions } from "@/hooks/useTraining";
 import { cn } from "@/lib/utils";
 
-// Menu items organized by section
-const menuSections = [
+type BadgeCounts = { players: number; training: number; notifications: number };
+
+// Menu items organized by section (badge counts injected from repositories)
+const buildMenuSections = (counts: BadgeCounts) => [
   {
     title: "OVERVIEW",
     items: [{ title: "Dashboard", url: "/", icon: LayoutDashboard }],
@@ -39,7 +43,7 @@ const menuSections = [
   {
     title: "PEOPLE",
     items: [
-      { title: "Pemain", url: "/pemain", icon: Users, badge: () => players.filter(p => p.status === "Aktif").length },
+      { title: "Pemain", url: "/pemain", icon: Users, badge: () => counts.players },
       { title: "Staf", url: "/staf", icon: ShieldCheck },
     ],
   },
@@ -47,7 +51,7 @@ const menuSections = [
     title: "SPORT",
     items: [
       { title: "Tim", url: "/tim", icon: Users2 },
-      { title: "Latihan", url: "/latihan", icon: Dumbbell, badge: () => trainingSessions.length },
+      { title: "Latihan", url: "/latihan", icon: Dumbbell, badge: () => counts.training },
       { title: "Kompetisi", url: "/kompetisi", icon: Trophy },
       { title: "Musim", url: "/musim", icon: CalendarDays },
     ],
@@ -56,7 +60,7 @@ const menuSections = [
     title: "OPERATIONS",
     items: [
       { title: "Keuangan", url: "/keuangan", icon: Wallet },
-      { title: "Notifikasi", url: "/notifikasi", icon: BellRing, badge: () => 3 },
+      { title: "Notifikasi", url: "/notifikasi", icon: BellRing, badge: () => counts.notifications },
       { title: "Aktivitas", url: "/aktivitas", icon: Activity },
     ],
   },
@@ -70,6 +74,14 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const pathname = useRouterState({ select: (r) => r.location.pathname });
+  const club = useClub().data;
+  const playersData = usePlayers().data ?? [];
+  const trainingData = useTrainingSessions().data ?? [];
+  const menuSections = buildMenuSections({
+    players: playersData.filter((p) => p.status === "Aktif").length,
+    training: trainingData.length,
+    notifications: 3,
+  });
 
   const isActive = (url: string) =>
     url === "/" ? pathname === "/" : pathname.startsWith(url);
@@ -98,12 +110,12 @@ export function AppSidebar() {
         {!collapsed && (
           <div className="mt-4 pt-4 border-t border-sidebar-border/50">
             <div className="text-xs">
-              <p className="font-semibold text-sidebar-foreground truncate">{club.name}</p>
+              <p className="font-semibold text-sidebar-foreground truncate">{club?.name ?? "—"}</p>
               <p className="text-[10px] text-muted-foreground truncate">
-                {club.city} • {club.sport}
+                {club?.city ?? "—"} • {club?.sport ?? "—"}
               </p>
               <p className="text-[10px] text-muted-foreground mt-1">
-                Manager • {club.season}
+                Manager • {club?.season ?? "—"}
               </p>
             </div>
           </div>

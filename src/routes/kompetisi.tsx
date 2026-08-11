@@ -4,6 +4,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { AppHeader } from "@/components/app-header";
 import { MatchResultCard } from "@/components/match-result-card";
+import { DataState } from "@/components/data-state";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -108,48 +109,75 @@ function KompetisiPage() {
               Kompetisi Musim {club_season_fallback()}
             </h2>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {competitions.map((c: Competition) => {
-              const cMatches = matches.filter((m: Match) => m.competitionId === c.id);
-              const cPast = cMatches.filter((m: Match) => m.skorHome !== null);
-              return (
-                <Link
-                  key={c.id}
-                  to="/kompetisi/$id"
-                  params={{ id: c.id }}
-                  className="group block rounded-xl border border-border bg-card p-4 transition-all hover:border-field/50 hover:bg-card/80 hover:shadow-md"
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="min-w-0">
-                      <h3 className="font-semibold text-foreground truncate">
-                        {c.name}
-                      </h3>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {c.level}
-                      </p>
+          <DataState
+            status={
+              competitionsQuery.isLoading || matchesQuery.isLoading
+                ? "loading"
+                : competitionsQuery.isError || matchesQuery.isError
+                  ? "error"
+                  : competitions.length === 0
+                    ? "empty"
+                    : "success"
+            }
+            errorMessage="Gagal memuat data kompetisi."
+            onRetry={() => {
+              void competitionsQuery.refetch();
+              void matchesQuery.refetch();
+            }}
+            emptyNode={
+              <div className="rounded-xl border border-dashed border-border bg-card/50 p-8 text-center">
+                <Trophy className="mx-auto h-8 w-8 text-muted-foreground" aria-hidden />
+                <p className="mt-3 font-semibold text-foreground">Belum ada kompetisi</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Kompetisi yang diikuti klub akan tampil di sini.
+                </p>
+              </div>
+            }
+          >
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {competitions.map((c: Competition) => {
+                const cMatches = matches.filter((m: Match) => m.competitionId === c.id);
+                const cPast = cMatches.filter((m: Match) => m.skorHome !== null);
+                return (
+                  <Link
+                    key={c.id}
+                    to="/kompetisi/$id"
+                    params={{ id: c.id }}
+                    className="group block rounded-xl border border-border bg-card p-4 transition-all hover:border-field/50 hover:bg-card/80 hover:shadow-md"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="min-w-0">
+                        <h3 className="font-semibold text-foreground truncate">
+                          {c.name}
+                        </h3>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {c.level}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Badge variant="outline" className="text-xs">
+                          {c.season}
+                        </Badge>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-field" aria-hidden />
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <Badge variant="outline" className="text-xs">
-                        {c.season}
+                    <div className="mt-3 flex items-center gap-2 text-xs">
+                      <Badge variant="outline" className="border-field/20 text-field bg-field/5">
+                        {cPast.length} pertandingan
                       </Badge>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-field" aria-hidden />
+                      {cMatches.length - cPast.length > 0 && (
+                        <Badge variant="outline" className="border-energetic/20 text-energetic-foreground bg-energetic/10">
+                          {cMatches.length - cPast.length} menanti
+                        </Badge>
+                      )}
                     </div>
-                  </div>
-                  <div className="mt-3 flex items-center gap-2 text-xs">
-                    <Badge variant="outline" className="border-field/20 text-field bg-field/5">
-                      {cPast.length} pertandingan
-                    </Badge>
-                    {cMatches.length - cPast.length > 0 && (
-                      <Badge variant="outline" className="border-energetic/20 text-energetic-foreground bg-energetic/10">
-                        {cMatches.length - cPast.length} menanti
-                      </Badge>
-                    )}
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </DataState>
         </section>
+
 
         {/* Upcoming Matches §13 — UPCOMING status */}
         {upcoming.length > 0 && (
@@ -191,13 +219,36 @@ function KompetisiPage() {
               <Plus className="h-4 w-4" aria-hidden /> Catat Pertandingan
             </Button>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {past.map((m: Match) => (
-              <Link key={m.id} to="/kompetisi/$id" params={{ id: m.id }}>
-                <MatchResultCard match={m} />
-              </Link>
-            ))}
-          </div>
+          <DataState
+            status={
+              pastQuery.isLoading
+                ? "loading"
+                : pastQuery.isError
+                  ? "error"
+                  : past.length === 0
+                    ? "empty"
+                    : "success"
+            }
+            errorMessage="Gagal memuat riwayat pertandingan."
+            onRetry={() => void pastQuery.refetch()}
+            emptyNode={
+              <div className="rounded-xl border border-dashed border-border bg-card/50 p-8 text-center">
+                <p className="font-semibold text-foreground">Belum ada pertandingan tercatat</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Catat pertandingan pertama untuk melihat riwayat di sini.
+                </p>
+              </div>
+            }
+          >
+            <div className="grid gap-3 sm:grid-cols-2">
+              {past.map((m: Match) => (
+                <Link key={m.id} to="/kompetisi/$id" params={{ id: m.id }}>
+                  <MatchResultCard match={m} />
+                </Link>
+              ))}
+            </div>
+          </DataState>
+
           <p className="text-sm text-muted-foreground">
             {totalPlayed} pertandingan musim ini • rata-rata{" "}
             {totalPlayed > 0 ? (record.gf / totalPlayed).toFixed(1) : 0} gol per

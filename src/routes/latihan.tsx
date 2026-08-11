@@ -6,7 +6,8 @@ import { TrainingSchedule } from "@/components/training-schedule";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { trainingSessions } from "@/lib/demo-data";
+import { DataState } from "@/components/data-state";
+import { useTrainingSessions } from "@/hooks/useTraining";
 
 export const Route = createFileRoute("/latihan")({
   head: () => ({
@@ -21,6 +22,8 @@ export const Route = createFileRoute("/latihan")({
 });
 
 function LatihanPage() {
+  const sessionsQuery = useTrainingSessions();
+  const trainingSessions = sessionsQuery.data ?? [];
   return (
     <>
       <AppHeader title="Latihan" subtitle={`${trainingSessions.length} sesi per minggu • Fokus minggu ini: Akselerasi passing`} />
@@ -101,7 +104,21 @@ function LatihanPage() {
           </Card>
         </div>
 
-        <TrainingSchedule />
+        <DataState
+          status={
+            sessionsQuery.isLoading
+              ? "loading"
+              : sessionsQuery.isError
+                ? "error"
+                : trainingSessions.length === 0
+                  ? "empty"
+                  : "success"
+          }
+          errorMessage="Gagal memuat jadwal latihan."
+          onRetry={() => void sessionsQuery.refetch()}
+        >
+          <TrainingSchedule sessions={trainingSessions} />
+        </DataState>
       </main>
     </>
   );
