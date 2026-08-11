@@ -4,7 +4,11 @@ import { CalendarDays, Flag, Trophy } from "lucide-react";
 import { AppHeader } from "@/components/app-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { club, competitions, matches, teamStatTotals } from "@/lib/demo-data";
+import { teamStatTotals } from "@/lib/demo-data"; // Allowed: pure utility function
+import { useClub } from "@/hooks/useOrganization";
+import { useCompetitions } from "@/hooks/useCompetitions";
+import { useMatches } from "@/hooks/useMatches";
+import { useActiveSeason } from "@/hooks/useSeasons";
 
 export const Route = createFileRoute("/musim")({
   head: () => ({
@@ -19,9 +23,14 @@ export const Route = createFileRoute("/musim")({
 
 function MusimPage() {
   const totals = teamStatTotals();
+  const clubQuery = useClub();
+  const competitions = useCompetitions().data ?? [];
+  const matches = useMatches().data ?? [];
+  const activeSeason = useActiveSeason().data;
+  const seasonLabel = clubQuery.data?.season ?? activeSeason?.name ?? "";
   return (
     <>
-      <AppHeader title="Musim" subtitle={`${club.season} • milestone dan target pertumbuhan`} />
+      <AppHeader title="Musim" subtitle={`${seasonLabel} • milestone dan target pertumbuhan`} />
       <main className="flex-1 space-y-5 p-4 md:p-6">
         <section className="grid gap-3 md:grid-cols-3">
           <Card className="border-field/30 bg-field/5">

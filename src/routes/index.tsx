@@ -27,6 +27,7 @@ import {
 } from "@/hooks/useMatches";
 import { useFinanceTotals } from "@/hooks/useFinance";
 import { useCompetitions } from "@/hooks/useCompetitions";
+import { useTrainingSessions } from "@/hooks/useTraining";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -56,6 +57,7 @@ function DashboardPage() {
   const pastMatchesData = usePastMatches().data ?? [];
   const upcomingMatchesData = useUpcomingMatches().data ?? [];
   const competitions = useCompetitions().data ?? [];
+  const trainingSessions = useTrainingSessions().data ?? [];
 
   if (!club) {
     return <div>Loading...</div>;
@@ -278,7 +280,7 @@ function DashboardPage() {
                     Detail <ArrowRight className="h-3 w-3" aria-hidden />
                   </Link>
                 </div>
-                <TrainingSchedule />
+                <TrainingSchedule sessions={trainingSessions} />
               </div>
 
               {/* Competition List mini */}
