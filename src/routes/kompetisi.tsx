@@ -218,13 +218,36 @@ function KompetisiPage() {
               <Plus className="h-4 w-4" aria-hidden /> Catat Pertandingan
             </Button>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {past.map((m: Match) => (
-              <Link key={m.id} to="/kompetisi/$id" params={{ id: m.id }}>
-                <MatchResultCard match={m} />
-              </Link>
-            ))}
-          </div>
+          <DataState
+            status={
+              pastQuery.isLoading
+                ? "loading"
+                : pastQuery.isError
+                  ? "error"
+                  : past.length === 0
+                    ? "empty"
+                    : "success"
+            }
+            errorMessage="Gagal memuat riwayat pertandingan."
+            onRetry={() => void pastQuery.refetch()}
+            emptyNode={
+              <div className="rounded-xl border border-dashed border-border bg-card/50 p-8 text-center">
+                <p className="font-semibold text-foreground">Belum ada pertandingan tercatat</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Catat pertandingan pertama untuk melihat riwayat di sini.
+                </p>
+              </div>
+            }
+          >
+            <div className="grid gap-3 sm:grid-cols-2">
+              {past.map((m: Match) => (
+                <Link key={m.id} to="/kompetisi/$id" params={{ id: m.id }}>
+                  <MatchResultCard match={m} />
+                </Link>
+              ))}
+            </div>
+          </DataState>
+
           <p className="text-sm text-muted-foreground">
             {totalPlayed} pertandingan musim ini • rata-rata{" "}
             {totalPlayed > 0 ? (record.gf / totalPlayed).toFixed(1) : 0} gol per
