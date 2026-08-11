@@ -27,7 +27,9 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
-import { club, players, trainingSessions } from "@/lib/demo-data";
+import { useClub } from "@/hooks/useOrganization";
+import { usePlayers } from "@/hooks/usePlayers";
+import { useTrainingSessions } from "@/hooks/useTraining";
 import { cn } from "@/lib/utils";
 
 // Menu items organized by section
