@@ -52,10 +52,10 @@ function demoImports(source: string): { typeOnly: boolean; names: string[] }[] {
   while ((m = re.exec(source))) {
     out.push({
       typeOnly: Boolean(m[1]),
-      names: m[2]
+      names: (m[2] ?? "")
         .split(",")
-        .map((n) => n.trim().replace(/^type\s+/, "").split(/\s+as\s+/)[0])
-        .filter(Boolean),
+        .map((n) => n.trim().replace(/^type\s+/, "").split(/\s+as\s+/)[0] ?? "")
+        .filter((n): n is string => n.length > 0),
     });
   }
   return out;
