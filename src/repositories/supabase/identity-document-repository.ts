@@ -20,6 +20,7 @@ import {
   isExpired,
   determineVerificationStatus,
 } from "../../domain/identity/identity-document-validator";
+import { sanitizeText, IDENTITY_ERROR } from "@/lib/security/pii";
 
 /**
  * Supabase implementation of IdentityDocumentRepository
@@ -35,7 +36,7 @@ export class SupabaseIdentityDocumentRepository implements IdentityDocumentRepos
       .order("created_at", { ascending: false });
 
     if (error) {
-      throw new Error(`Failed to fetch identity documents: ${error.message}`);
+      throw new Error(sanitizeText(`Failed to fetch identity documents`) || IDENTITY_ERROR.FAILED);
     }
 
     return (data || []).map((doc) => this.mapFromDatabase(doc));
@@ -53,7 +54,7 @@ export class SupabaseIdentityDocumentRepository implements IdentityDocumentRepos
         // No rows found - return null instead of error
         return null;
       }
-      throw new Error(`Failed to fetch identity document: ${error.message}`);
+      throw new Error(sanitizeText(`Failed to fetch identity document`) || IDENTITY_ERROR.FAILED);
     }
 
     return data ? this.mapFromDatabase(data) : null;
@@ -69,7 +70,7 @@ export class SupabaseIdentityDocumentRepository implements IdentityDocumentRepos
     );
 
     if (!validationResult.isValid) {
-      throw new Error(validationResult.error || "Dokumen identitas tidak valid");
+      throw new Error(validationResult.error || IDENTITY_ERROR.INVALID);
     }
 
     // Check for duplicates
@@ -80,7 +81,7 @@ export class SupabaseIdentityDocumentRepository implements IdentityDocumentRepos
     );
 
     if (isDupe) {
-      throw new Error("Dokumen identitas ini sudah terdaftar");
+      throw new Error(IDENTITY_ERROR.DUPLICATE);
     }
 
     // Normalize document number
@@ -123,9 +124,9 @@ export class SupabaseIdentityDocumentRepository implements IdentityDocumentRepos
     if (error) {
       // Check if it's a duplicate constraint error
       if (error.code === "23505") {
-        throw new Error("Dokumen identitas ini sudah terdaftar");
+        throw new Error(IDENTITY_ERROR.DUPLICATE);
       }
-      throw new Error(`Failed to create identity document: ${error.message}`);
+      throw new Error(sanitizeText(`Failed to create identity document`) || IDENTITY_ERROR.FAILED);
     }
 
     return document;
@@ -135,7 +136,7 @@ export class SupabaseIdentityDocumentRepository implements IdentityDocumentRepos
     const document = await this.getById(id);
 
     if (!document) {
-      throw new Error("Dokumen identitas tidak ditemukan");
+      throw new Error(IDENTITY_ERROR.NOT_FOUND);
     }
 
     // If document number is being changed, validate it
@@ -148,7 +149,7 @@ export class SupabaseIdentityDocumentRepository implements IdentityDocumentRepos
       );
 
       if (!validationResult.isValid) {
-        throw new Error(validationResult.error || "Dokumen identitas tidak valid");
+        throw new Error(validationResult.error || IDENTITY_ERROR.INVALID);
       }
 
       // Check for duplicate with exclusion of current document
@@ -160,7 +161,7 @@ export class SupabaseIdentityDocumentRepository implements IdentityDocumentRepos
       );
 
       if (isDupe) {
-        throw new Error("Nomor dokumen identitas ini sudah terdaftar");
+        throw new Error(IDENTITY_ERROR.DUPLICATE);
       }
     }
 
@@ -205,9 +206,9 @@ export class SupabaseIdentityDocumentRepository implements IdentityDocumentRepos
 
     if (error) {
       if (error.code === "23505") {
-        throw new Error("Nomor dokumen identitas ini sudah terdaftar");
+        throw new Error(IDENTITY_ERROR.DUPLICATE);
       }
-      throw new Error(`Failed to update identity document: ${error.message}`);
+      throw new Error(sanitizeText(`Failed to update identity document`) || IDENTITY_ERROR.FAILED);
     }
 
     return updated;
@@ -217,7 +218,7 @@ export class SupabaseIdentityDocumentRepository implements IdentityDocumentRepos
     const document = await this.getById(id);
 
     if (!document) {
-      throw new Error("Dokumen identitas tidak ditemukan");
+      throw new Error(IDENTITY_ERROR.NOT_FOUND);
     }
 
     const { error } = await this.supabase
@@ -226,7 +227,7 @@ export class SupabaseIdentityDocumentRepository implements IdentityDocumentRepos
       .eq("id", id);
 
     if (error) {
-      throw new Error(`Failed to delete identity document: ${error.message}`);
+      throw new Error(sanitizeText(`Failed to delete identity document`) || IDENTITY_ERROR.FAILED);
     }
   }
 
@@ -251,7 +252,7 @@ export class SupabaseIdentityDocumentRepository implements IdentityDocumentRepos
     const { data, error } = await query.maybeSingle();
 
     if (error) {
-      throw new Error(`Failed to find identity document: ${error.message}`);
+      throw new Error(sanitizeText(`Failed to find identity document`) || IDENTITY_ERROR.FAILED);
     }
 
     return data ? this.mapFromDatabase(data) : null;

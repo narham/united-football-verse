@@ -19,6 +19,7 @@ import {
   determineVerificationStatus,
 } from "../../domain/identity/identity-document-validator";
 import { DemoStorage } from "./storage";
+import { IDENTITY_ERROR, sanitizeText } from "@/lib/security/pii";
 import { identityDocuments as initialIdentityDocuments } from "@/lib/demo-data";
 
 /**
@@ -66,7 +67,7 @@ export class DemoIdentityDocumentRepository implements IdentityDocumentRepositor
     );
 
     if (!validationResult.isValid) {
-      throw new Error(validationResult.error || "Dokumen identitas tidak valid");
+      throw new Error(sanitizeText(validationResult.error ?? "") || IDENTITY_ERROR.INVALID);
     }
 
     // Check for duplicates
@@ -77,7 +78,7 @@ export class DemoIdentityDocumentRepository implements IdentityDocumentRepositor
     );
 
     if (isDupe) {
-      throw new Error("Dokumen identitas ini sudah terdaftar");
+      throw new Error(IDENTITY_ERROR.DUPLICATE);
     }
 
     // Normalize document number
@@ -121,7 +122,7 @@ export class DemoIdentityDocumentRepository implements IdentityDocumentRepositor
     const document = await this.getById(id);
 
     if (!document) {
-      throw new Error("Dokumen identitas tidak ditemukan");
+      throw new Error(IDENTITY_ERROR.NOT_FOUND);
     }
 
     // If document number is being changed, validate it
@@ -134,7 +135,7 @@ export class DemoIdentityDocumentRepository implements IdentityDocumentRepositor
       );
 
       if (!validationResult.isValid) {
-        throw new Error(validationResult.error || "Dokumen identitas tidak valid");
+        throw new Error(sanitizeText(validationResult.error ?? "") || IDENTITY_ERROR.INVALID);
       }
 
       // Check for duplicate with exclusion of current document
@@ -146,7 +147,7 @@ export class DemoIdentityDocumentRepository implements IdentityDocumentRepositor
       );
 
       if (isDupe) {
-        throw new Error("Nomor dokumen identitas ini sudah terdaftar");
+        throw new Error(IDENTITY_ERROR.DUPLICATE);
       }
     }
 
@@ -187,7 +188,7 @@ export class DemoIdentityDocumentRepository implements IdentityDocumentRepositor
     const index = allDocuments.findIndex((doc) => doc.id === id);
 
     if (index === -1) {
-      throw new Error("Dokumen identitas tidak ditemukan");
+      throw new Error(IDENTITY_ERROR.NOT_FOUND);
     }
 
     allDocuments[index] = updated;
@@ -200,14 +201,14 @@ export class DemoIdentityDocumentRepository implements IdentityDocumentRepositor
     const document = await this.getById(id);
 
     if (!document) {
-      throw new Error("Dokumen identitas tidak ditemukan");
+      throw new Error(IDENTITY_ERROR.NOT_FOUND);
     }
 
     const allDocuments = this.storage.get<IdentityDocument[]>("identity_documents", undefined, []);
     const filtered = allDocuments.filter((doc) => doc.id !== id);
 
     if (filtered.length === allDocuments.length) {
-      throw new Error("Dokumen identitas tidak ditemukan");
+      throw new Error(IDENTITY_ERROR.NOT_FOUND);
     }
 
     this.storage.set("identity_documents", filtered);
