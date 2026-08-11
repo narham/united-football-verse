@@ -4,6 +4,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { AppHeader } from "@/components/app-header";
 import { MatchResultCard } from "@/components/match-result-card";
+import { DataState } from "@/components/data-state";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
