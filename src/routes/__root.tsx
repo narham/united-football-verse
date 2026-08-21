@@ -17,6 +17,8 @@ import { OrganizationProvider } from "@/lib/auth/organization-context";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { ErrorState } from "@/components/error-state";
+import { Toaster } from "@/components/ui/sonner";
+
 import { DEFAULT_CLUB_ID } from "@/lib/demo-data";
 
 function NotFoundComponent() {
