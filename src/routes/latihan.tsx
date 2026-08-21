@@ -63,19 +63,20 @@ function LatihanPage() {
               </div>
               <div className="mt-4 space-y-3">
                 {[
-                  { label: "Hadir", value: "17/20", tone: "field" },
-                  { label: "Sakit/Izin", value: "2", tone: "energetic" },
-                  { label: "Terlambat", value: "1", tone: "draw" },
+                  { label: "Hadir", value: "17/20", dot: "bg-field" },
+                  { label: "Sakit/Izin", value: "2", dot: "bg-energetic" },
+                  { label: "Terlambat", value: "1", dot: "bg-draw" },
                 ].map((item) => (
                   <div key={item.label} className="flex items-center justify-between rounded-lg border border-border bg-muted/30 px-3 py-2">
-                    <div className="flex items-center gap-2">
-                      <div className={`h-2 w-2 rounded-full bg-${item.tone}`} aria-hidden />
-                      <span className="text-sm text-muted-foreground">{item.label}</span>
+                    <div className="flex min-w-0 items-center gap-2">
+                      <div className={`h-2 w-2 shrink-0 rounded-full ${item.dot}`} aria-hidden />
+                      <span className="truncate text-sm text-muted-foreground">{item.label}</span>
                     </div>
-                    <span className="font-semibold text-foreground">{item.value}</span>
+                    <span className="shrink-0 font-semibold text-foreground">{item.value}</span>
                   </div>
                 ))}
               </div>
+
             </CardContent>
           </Card>
 
