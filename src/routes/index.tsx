@@ -264,9 +264,8 @@ function DashboardPage() {
               </div>
             </div>
 
-            </div>
-
             <div className="space-y-4">
+
               {/* Upcoming Training per §9 */}
               <div>
                 <div className="flex items-center justify-between mb-3">
@@ -307,10 +306,12 @@ function DashboardPage() {
                       </Badge>
                     </li>
                 ))}
-              </ul>
+                </ul>
+              </div>
             </div>
           </div>
         </section>
+
 
         {/* Finance Summary Section per §9 */}
         <section aria-label="Ringkasan keuangan klub" className="space-y-4">
