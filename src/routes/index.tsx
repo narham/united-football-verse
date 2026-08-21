@@ -306,10 +306,12 @@ function DashboardPage() {
                       </Badge>
                     </li>
                 ))}
-              </ul>
+                </ul>
+              </div>
             </div>
           </div>
         </section>
+
 
         {/* Finance Summary Section per §9 */}
         <section aria-label="Ringkasan keuangan klub" className="space-y-4">
