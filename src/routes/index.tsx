@@ -264,9 +264,8 @@ function DashboardPage() {
               </div>
             </div>
 
-            </div>
-
             <div className="space-y-4">
+
               {/* Upcoming Training per §9 */}
               <div>
                 <div className="flex items-center justify-between mb-3">
