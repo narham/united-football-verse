@@ -388,28 +388,25 @@ export function AppHeader({
       </div>
 
       {/* Main Header */}
-      <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-border bg-card/80 px-4 py-3 backdrop-blur md:px-6">
+      <header className="sticky top-0 z-20 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 border-b border-border bg-card/80 px-4 py-3 backdrop-blur md:px-6">
         <SidebarTrigger className="shrink-0" aria-label="Toggle navigasi sidebar" />
-        <div className="min-w-0 flex-1">
-          <h1 className="font-display text-2xl leading-none text-foreground md:text-3xl">
+        <div className="min-w-0">
+          <h1 className="truncate font-display text-xl leading-none text-foreground sm:text-2xl md:text-3xl">
             {title}
           </h1>
           {subtitle && (
-            <p className="mt-1 truncate text-sm text-muted-foreground">{subtitle}</p>
+            <p className="mt-1 truncate text-xs text-muted-foreground sm:text-sm">{subtitle}</p>
           )}
         </div>
 
-        <div className="hidden items-center gap-3 sm:flex">
-          {/* Season/Organization info can be added here when org data is available */}
-        </div>
-
-        <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           <CommandPalette open={commandOpen} onOpenChange={setCommandOpen} />
           <ClubSwitcher />
           <NotificationBell />
           <ProfileMenu />
         </div>
       </header>
+
     </>
   );
 }
