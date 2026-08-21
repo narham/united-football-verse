@@ -114,11 +114,13 @@ function RootComponent() {
             <SidebarProvider>
               <div className="flex min-h-screen w-full bg-background">
                 <AppSidebar />
-                <SidebarInset className="flex flex-col">
+                <SidebarInset className="flex min-w-0 flex-col">
                   <Outlet />
                 </SidebarInset>
               </div>
+              <Toaster position="top-right" richColors />
             </SidebarProvider>
+
           </OrganizationProvider>
         </AuthProvider>
       </RepositoriesProvider>
