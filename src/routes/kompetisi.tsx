@@ -208,7 +208,7 @@ function KompetisiPage() {
 
         {/* Match History §13 */}
         <section aria-label="Riwayat hasil pertandingan" className="space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="font-display text-2xl text-foreground">
               Riwayat Pertandingan
             </h2>
